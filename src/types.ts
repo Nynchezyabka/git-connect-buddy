@@ -6,6 +6,10 @@ export interface Task {
   active: boolean;
   statusChangedAt: number;
   subcategory?: string;
+  /** Total seconds spent on this task via timer */
+  timeSpent?: number;
+  /** Recurring template reference */
+  templateId?: number;
 }
 
 export type CategoryId = 0 | 1 | 2 | 3 | 4 | 5;
@@ -56,3 +60,28 @@ export const SECTIONS: SectionDef[] = [
   { categories: [2, 5], title: "Система безопасности и доступность простых радостей", sectionClass: "security" },
   { categories: [3, 4], title: "Простые и эго-радости", sectionClass: "joys" },
 ];
+
+// Recurring task templates
+export type RecurrenceType = "daily" | "weekly" | "monthly";
+
+export interface TaskTemplate {
+  id: number;
+  text: string;
+  category: CategoryId;
+  subcategory?: string;
+  recurrence: RecurrenceType;
+  /** Day of week (0-6, Sun-Sat) for weekly; day of month (1-31) for monthly */
+  recurrenceDay?: number;
+  /** Hour to create task (0-23) */
+  recurrenceHour: number;
+  active: boolean;
+  lastCreated?: string; // ISO date string YYYY-MM-DD
+}
+
+export const RECURRENCE_LABELS: Record<RecurrenceType, string> = {
+  daily: "Ежедневно",
+  weekly: "Еженедельно",
+  monthly: "Ежемесячно",
+};
+
+export const WEEKDAYS = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
