@@ -226,7 +226,7 @@ export function HistoryModal({ onClose }: Props) {
           {selectedTasks.length > 0 ? (
             <div className="relative pl-5 mb-4">
               {/* Vertical line */}
-              <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-border" />
+              <div className="absolute left-2 top-0 bottom-0 w-1 bg-border rounded-full" />
 
               {selectedTasks.map((task, idx) => {
                 const completedAt = new Date(task.statusChangedAt);
