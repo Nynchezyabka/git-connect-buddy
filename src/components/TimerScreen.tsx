@@ -145,29 +145,29 @@ export function TimerScreen({ task, onClose }: Props) {
           <X size={20} />
         </button>
 
-        <h2 className="font-display text-2xl mb-2">Ваша задача:</h2>
+        <h2 className="font-display text-3xl sm:text-4xl mb-2 timer-label-glow">Ваша задача:</h2>
         <div
-          className="text-lg font-semibold text-center px-4 py-2 rounded-lg mb-2 max-w-md"
+          className="text-base sm:text-lg font-semibold text-center px-4 py-2 rounded-lg mb-2 max-w-md shadow-sm"
           style={{ backgroundColor: info.bgColor }}
         >
           {task.text}
         </div>
-        <div className="text-sm mb-4 opacity-80">{info.name}</div>
+        <div className="text-sm mb-4 opacity-80 timer-label-glow font-medium">{info.name}</div>
 
         {/* Elapsed time indicator */}
         {(task.timeSpent ?? 0) > 0 && (
-          <div className="text-xs mb-2 opacity-60 flex items-center gap-1">
+          <div className="text-xs mb-2 opacity-60 flex items-center gap-1 bg-white/40 px-2 py-1 rounded-full">
             ⏱ Ранее: {Math.floor((task.timeSpent ?? 0) / 60)}м
           </div>
         )}
 
         {/* Timer display */}
-        <div className="font-mono text-7xl font-bold mb-2 tracking-wider">
+        <div className="font-mono text-7xl sm:text-8xl font-bold mb-2 tracking-wider timer-glow">
           {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}
         </div>
 
         {currentElapsed > 0 && (
-          <div className="text-sm mb-4 opacity-60 font-mono">
+          <div className="text-sm mb-4 opacity-70 font-mono bg-white/30 px-3 py-1 rounded-full">
             ▶ {String(elapsedMins).padStart(2, "0")}:{String(elapsedSecs).padStart(2, "0")} в этой сессии
           </div>
         )}
@@ -175,7 +175,7 @@ export function TimerScreen({ task, onClose }: Props) {
         {!finished && (
           <>
             {/* Minutes input */}
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-4 bg-white/50 px-3 py-2 rounded-lg shadow-sm">
               <input
                 type="number"
                 min={1}
@@ -186,13 +186,13 @@ export function TimerScreen({ task, onClose }: Props) {
                   setMinutes(v);
                   if (!running) setTimeLeft(v * 60);
                 }}
-                className="w-16 text-center rounded-md border border-border p-1.5 text-sm"
+                className="w-16 text-center rounded-md border border-border bg-white p-1.5 text-sm font-medium"
                 disabled={running}
               />
-              <span className="text-sm">мин</span>
+              <span className="text-sm font-medium">мин</span>
               <button
                 onClick={() => setSoundEnabled(!soundEnabled)}
-                className="ml-3 p-2 rounded-md bg-white/50 active:bg-white/70"
+                className="ml-2 p-2 rounded-md bg-white/70 active:bg-white/90 border border-border/30"
               >
                 {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
               </button>
@@ -202,28 +202,28 @@ export function TimerScreen({ task, onClose }: Props) {
             <div className="flex gap-3 mb-6">
               <button
                 onClick={start}
-                className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium active:scale-95 transition-all"
+                className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium active:scale-95 transition-all shadow-sm"
               >
                 <Play size={16} /> Старт
               </button>
               <button
                 onClick={pause}
-                className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-white/60 font-medium active:scale-95 transition-all"
+                className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-white/70 font-medium active:scale-95 transition-all shadow-sm border border-border/30"
               >
                 <Pause size={16} /> Пауза
               </button>
               <button
                 onClick={reset}
-                className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-white/60 font-medium active:scale-95 transition-all"
+                className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-white/70 font-medium active:scale-95 transition-all shadow-sm border border-border/30"
               >
                 <RotateCcw size={16} /> Сброс
               </button>
             </div>
 
-            {/* Complete now button */}
+            {/* Complete now button - muted green */}
             <button
               onClick={completeTask}
-              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-green-600 text-white font-medium active:scale-95 transition-all"
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-emerald-600/80 text-white font-medium active:scale-95 transition-all shadow-md"
             >
               <Check size={18} /> Готово
             </button>
@@ -232,16 +232,16 @@ export function TimerScreen({ task, onClose }: Props) {
 
         {finished && (
           <div className="flex flex-col gap-3">
-            <p className="text-center text-lg font-semibold mb-2">Время вышло!</p>
+            <p className="text-center text-lg font-semibold mb-2 timer-label-glow">Время вышло!</p>
             <button
               onClick={completeTask}
-              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-green-600 text-white font-medium active:scale-95 transition-all"
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-emerald-600/80 text-white font-medium active:scale-95 transition-all shadow-md"
             >
               <Check size={18} /> Завершить задачу
             </button>
             <button
               onClick={returnTask}
-              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-white/60 font-medium active:scale-95 transition-all"
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-white/70 font-medium active:scale-95 transition-all shadow-sm border border-border/30"
             >
               <Undo2 size={18} /> Вернуть в коробочку
             </button>

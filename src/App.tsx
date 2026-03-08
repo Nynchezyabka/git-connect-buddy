@@ -172,12 +172,14 @@ export default function App() {
       <div className="max-w-4xl mx-auto p-2.5">
         {/* Header */}
         <header className="text-center mb-4 pt-1 relative">
-          <div className="absolute right-0 top-1 flex items-center gap-1.5 z-10">
+          <div className="absolute left-0 top-1 z-10">
             <InfoButton />
+          </div>
+          <div className="absolute right-0 top-1 flex items-center gap-1.5 z-10">
             <NotificationButton />
             <ThemeToggle />
           </div>
-          <h1 className="font-display text-4xl text-primary drop-shadow-sm animate-fade-in">
+          <h1 className="font-display text-4xl text-primary drop-shadow-sm animate-fade-in px-10">
             🎁 КОРОБОЧКА 5.0
           </h1>
         </header>
