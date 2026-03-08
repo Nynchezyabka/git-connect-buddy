@@ -163,7 +163,7 @@ export function HistoryModal({ onClose }: Props) {
 
           <div className="grid grid-cols-7 gap-0.5 text-center">
             {WEEKDAY_HEADERS.map((wd) => (
-              <div key={wd} className="text-[10px] font-semibold text-muted-foreground py-1">{wd}</div>
+              <div key={wd} className="text-xs font-semibold text-muted-foreground py-1">{wd}</div>
             ))}
             {calendarDays.map((day, i) => {
               if (day === null) return <div key={`e-${i}`} />;
