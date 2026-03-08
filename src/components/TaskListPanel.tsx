@@ -252,8 +252,8 @@ function TaskCard({
 
   const subcategories = [
     ...(DEFAULT_SUBCATEGORIES[task.category] || []),
-    ...((getCustomSubcategories()[String(task.category)] || []).filter(
-      (c) => !(DEFAULT_SUBCATEGORIES[task.category] || []).includes(c)
+    ...((getCustomSubcategoriesSync()[String(task.category)] || []).filter(
+      (c: string) => !(DEFAULT_SUBCATEGORIES[task.category] || []).includes(c)
     )),
   ];
 
