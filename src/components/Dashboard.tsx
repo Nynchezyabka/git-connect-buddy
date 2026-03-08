@@ -30,7 +30,7 @@ export function Dashboard({ onRandomTask }: Props) {
 
   return (
     <div className="flex flex-col gap-3">
-      {SECTIONS.map((section) => {
+      {SECTIONS.map((section, idx) => {
         const active = countActive(section.categories);
         const completed = countCompleted(section.categories);
         const total = countTotal(section.categories);
@@ -39,9 +39,10 @@ export function Dashboard({ onRandomTask }: Props) {
           <div
             key={section.sectionClass}
             className={cn(
-              "rounded-lg shadow-sm p-5 relative overflow-hidden cursor-pointer transition-all active:translate-y-[-2px] active:shadow-md",
+              "rounded-lg shadow-sm p-5 relative overflow-hidden cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm animate-fade-in",
               sectionColors[section.sectionClass]
             )}
+            style={{ animationDelay: `${idx * 80}ms`, animationFillMode: "both" }}
             onClick={() => onRandomTask(section.categories)}
           >
             <h2 className="font-display text-2xl text-center leading-tight">
@@ -65,14 +66,14 @@ export function Dashboard({ onRandomTask }: Props) {
             <div className="flex justify-center gap-2 mt-3">
               <button
                 onClick={(e) => { e.stopPropagation(); onRandomTask(section.categories); }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/50 text-sm font-medium active:scale-95 transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/50 text-sm font-medium active:scale-95 hover:bg-white/70 transition-all"
               >
                 <Dice5 size={16} />
                 <span>случайная задача</span>
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); openAddModal(section.categories[0], section.categories); }}
-                className="flex items-center justify-center w-8 h-8 rounded-md bg-white/50 active:scale-95 transition-all"
+                className="flex items-center justify-center w-8 h-8 rounded-md bg-white/50 active:scale-95 hover:bg-white/70 transition-all"
               >
                 <Plus size={16} />
               </button>
