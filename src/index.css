@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 36 100% 97%;       /* #fffaf0 */
+    --foreground: 16 21% 25%;        /* #5d4037-ish dark brown */
+    --primary: 16 21% 29%;           /* #5d4037 */
+    --primary-foreground: 36 100% 97%;
+    --muted: 30 10% 90%;
+    --muted-foreground: 16 10% 45%;
+    --accent: 45 100% 65%;           /* golden */
+    --accent-foreground: 16 21% 25%;
+    --border: 30 15% 82%;
+    --ring: 16 21% 29%;
+    --radius: 0.5rem;
+
+    /* Category accent colors */
+    --cat-0: 0 0% 62%;               /* #9E9E9E */
+    --cat-0-bg: 0 0% 96%;            /* #f5f5f5 */
+    --cat-1: 45 100% 65%;            /* #FFD54F */
+    --cat-1-bg: 54 100% 88%;         /* #fff9c4 */
+    --cat-2: 213 90% 69%;            /* #64B5F6 */
+    --cat-2-bg: 207 100% 86%;        /* #bbdefb */
+    --cat-3: 123 38% 64%;            /* #81C784 */
+    --cat-3-bg: 125 38% 85%;         /* #c8e6c9 */
+    --cat-4: 0 65% 67%;              /* #E57373 */
+    --cat-4-bg: 0 100% 90%;          /* #ffcdd2 */
+    --cat-5: 261 38% 63%;            /* #9575CD */
+    --cat-5-bg: 261 47% 85%;         /* #d1c4e9 */
+  }
+
+  body {
+    @apply font-body text-foreground bg-background;
+    background-image:
+      linear-gradient(rgba(210, 190, 150, 0.12) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(210, 190, 150, 0.12) 1px, transparent 1px);
+    background-size: 20px 20px;
+    line-height: 1.4;
+    overflow-x: hidden;
+  }
+}

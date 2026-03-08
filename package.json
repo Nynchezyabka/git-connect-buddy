@@ -1,21 +1,14 @@
 {
   "name": "korobochka",
-  "version": "4.6",
+  "version": "5.0.0",
   "private": true,
+  "type": "module",
   "description": "PWA task planner with timer. Organize your tasks in categories and complete them with focused time blocks.",
   "scripts": {
-    "dev": "node server.js",
-    "start": "node server.js"
+    "dev": "vite",
+    "build": "vite build",
+    "build:dev": "vite build --mode development",
+    "preview": "vite preview"
   },
-  "license": "MIT",
-  "dependencies": {
-    "@tanstack/react-query": "^5.90.21",
-    "clsx": "^2.1.1",
-    "lucide-react": "^0.577.0",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "sonner": "^2.0.7",
-    "tailwind-merge": "^3.5.0",
-    "web-push": "^3.6.7"
-  }
+  "license": "MIT"
 }
