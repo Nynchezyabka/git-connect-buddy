@@ -14,13 +14,45 @@ interface Props {
 export function AddTaskModal({ defaultCategory, restrictCategories, onAdd, onClose }: Props) {
   const [text, setText] = useState("");
   const [category, setCategory] = useState<CategoryId>(defaultCategory);
+  const [subcategory, setSubcategory] = useState<string>("");
+  const [customSubInput, setCustomSubInput] = useState("");
+  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [customSubs, setCustomSubs] = useState(() => getCustomSubcategories());
   const textRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     textRef.current?.focus();
   }, []);
 
+  // Reset subcategory when category changes
+  useEffect(() => {
+    setSubcategory("");
+    setShowCustomInput(false);
+  }, [category]);
+
   const cats = restrictCategories ?? ([0, 1, 2, 5, 3, 4] as CategoryId[]);
+
+  const getSubcategories = (cat: CategoryId): string[] => {
+    const defaults = DEFAULT_SUBCATEGORIES[cat] || [];
+    const custom = customSubs[String(cat)] || [];
+    return [...defaults, ...custom.filter((c) => !defaults.includes(c))];
+  };
+
+  const addCustomSubcategory = () => {
+    const val = customSubInput.trim();
+    if (!val) return;
+    const key = String(category);
+    const updated = { ...customSubs };
+    if (!updated[key]) updated[key] = [];
+    if (!updated[key].includes(val) && !(DEFAULT_SUBCATEGORIES[category] || []).includes(val)) {
+      updated[key] = [...updated[key], val];
+      setCustomSubs(updated);
+      saveCustomSubcategories(updated);
+    }
+    setSubcategory(val);
+    setCustomSubInput("");
+    setShowCustomInput(false);
+  };
 
   const catBgMap: Record<CategoryId, string> = {
     0: "bg-cat-0-bg",
@@ -42,7 +74,7 @@ export function AddTaskModal({ defaultCategory, restrictCategories, onAdd, onClo
 
   const handleSubmit = () => {
     if (!text.trim()) return;
-    onAdd(text, category);
+    onAdd(text, category, subcategory || undefined);
     setText("");
     textRef.current?.focus();
   };
