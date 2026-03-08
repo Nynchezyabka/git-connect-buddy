@@ -251,19 +251,19 @@ export function HistoryModal({ onClose }: Props) {
                       CAT_COLORS[task.category].border
                     )}>
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] text-muted-foreground font-mono">
+                        <span className="text-xs text-muted-foreground font-mono">
                           {formatHHMM(startTime)}
                         </span>
                         {durationMin > 0 && (
-                          <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-                            <Clock size={9} /> {durationMin}м
+                          <span className="text-xs text-muted-foreground flex items-center gap-0.5">
+                            <Clock size={11} /> {durationMin}м
                           </span>
                         )}
                       </div>
-                      <p className="text-xs font-medium leading-snug mb-1.5">{task.text}</p>
+                      <p className="text-sm font-medium leading-snug mb-1.5">{task.text}</p>
                       <div className="flex flex-wrap gap-1">
                         <span className={cn(
-                          "text-[9px] px-1.5 py-0.5 rounded font-semibold",
+                          "text-[10px] px-1.5 py-0.5 rounded font-semibold",
                           DOT_COLORS[task.category], "text-white"
                         )}>
                           {catInfo.name}
