@@ -3,7 +3,7 @@ import { useApp } from "@/App";
 import { cn } from "@/lib/utils";
 import {
   CircleCheck, Shield, Smile, GraduationCap, Heart, CircleHelp,
-  Dice5, Plus,
+  Dices, Plus,
 } from "lucide-react";
 
 const sectionColors: Record<string, string> = {
@@ -68,7 +68,7 @@ export function Dashboard({ onRandomTask }: Props) {
                 onClick={(e) => { e.stopPropagation(); onRandomTask(section.categories); }}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/50 text-sm font-medium active:scale-95 hover:bg-white/70 transition-all"
               >
-                <Dice5 size={16} />
+                <Dices size={16} />
                 <span>случайная задача</span>
               </button>
               <button

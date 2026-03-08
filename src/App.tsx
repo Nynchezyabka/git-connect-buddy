@@ -207,14 +207,12 @@ export default function App() {
               Скачать задачи
             </button>
           </div>
-          <div className="grid grid-cols-2 gap-2.5">
-            <button
-              onClick={() => { setShowTemplates(true); setShowTasks(false); setShowHistory(false); }}
-              className="py-3 px-4 rounded-lg bg-muted text-muted-foreground font-medium shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-            >
-              <Repeat size={16} /> Шаблоны
-            </button>
-          </div>
+          <button
+            onClick={() => { setShowTemplates(true); setShowTasks(false); setShowHistory(false); }}
+            className="w-full py-3 px-4 rounded-lg bg-muted text-muted-foreground font-medium shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+          >
+            <Repeat size={16} /> Шаблоны
+          </button>
           <label className="w-full py-3 px-4 rounded-lg bg-muted text-muted-foreground font-medium text-center cursor-pointer shadow-sm active:scale-[0.98] transition-all">
             📂 Загрузить из файла
             <input

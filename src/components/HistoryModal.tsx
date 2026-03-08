@@ -163,7 +163,7 @@ export function HistoryModal({ onClose }: Props) {
 
           <div className="grid grid-cols-7 gap-0.5 text-center">
             {WEEKDAY_HEADERS.map((wd) => (
-              <div key={wd} className="text-[10px] font-semibold text-muted-foreground py-1">{wd}</div>
+              <div key={wd} className="text-xs font-semibold text-muted-foreground py-1">{wd}</div>
             ))}
             {calendarDays.map((day, i) => {
               if (day === null) return <div key={`e-${i}`} />;
@@ -213,8 +213,8 @@ export function HistoryModal({ onClose }: Props) {
                 const catTasks = selectedTasks.filter((t) => t.category === cat);
                 const catTime = catTasks.reduce((s, t) => s + (t.timeSpent ?? 0), 0);
                 return (
-                  <span key={cat} className={cn("inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full", CAT_COLORS[cat].bg)}>
-                    <CategoryIcon category={cat} size={10} />
+                  <span key={cat} className={cn("inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full", CAT_COLORS[cat].bg)}>
+                    <CategoryIcon category={cat} size={12} />
                     {catTasks.length} · {catTime > 0 ? formatTime(catTime) : "—"}
                   </span>
                 );
@@ -226,7 +226,7 @@ export function HistoryModal({ onClose }: Props) {
           {selectedTasks.length > 0 ? (
             <div className="relative pl-5 mb-4">
               {/* Vertical line */}
-              <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-border" />
+              <div className="absolute left-2 top-0 bottom-0 w-1 bg-border rounded-full" />
 
               {selectedTasks.map((task, idx) => {
                 const completedAt = new Date(task.statusChangedAt);
@@ -240,37 +240,37 @@ export function HistoryModal({ onClose }: Props) {
                   <div key={task.id} className="relative mb-2.5 last:mb-0">
                     {/* Dot on timeline */}
                     <div className={cn(
-                      "absolute -left-3 top-2 w-2.5 h-2.5 rounded-full border-2 border-background",
+                      "absolute -left-3.5 top-2 w-3.5 h-3.5 rounded-full border-2 border-background",
                       DOT_COLORS[task.category]
                     )} />
 
                     {/* Sticker */}
                     <div className={cn(
-                      "rounded-lg p-2.5 border-l-3",
+                      "rounded-lg p-3 border-l-4",
                       CAT_COLORS[task.category].bg,
                       CAT_COLORS[task.category].border
                     )}>
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] text-muted-foreground font-mono">
+                        <span className="text-xs text-muted-foreground font-mono">
                           {formatHHMM(startTime)}
                         </span>
                         {durationMin > 0 && (
-                          <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-                            <Clock size={9} /> {durationMin}м
+                          <span className="text-xs text-muted-foreground flex items-center gap-0.5">
+                            <Clock size={11} /> {durationMin}м
                           </span>
                         )}
                       </div>
-                      <p className="text-xs font-medium leading-snug mb-1.5">{task.text}</p>
+                      <p className="text-sm font-medium leading-snug mb-1.5">{task.text}</p>
                       <div className="flex flex-wrap gap-1">
                         <span className={cn(
-                          "text-[9px] px-1.5 py-0.5 rounded font-semibold",
+                          "text-[10px] px-1.5 py-0.5 rounded font-semibold",
                           DOT_COLORS[task.category], "text-white"
                         )}>
                           {catInfo.name}
                         </span>
                         {task.subcategory && (
                           <span className={cn(
-                            "text-[9px] px-1.5 py-0.5 rounded",
+                            "text-[10px] px-1.5 py-0.5 rounded",
                             CAT_COLORS[task.category].bg,
                             "border border-current opacity-70"
                           )}>
