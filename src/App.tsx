@@ -189,17 +189,17 @@ export default function App() {
         {/* Controls */}
         <div className="flex flex-col gap-2.5 my-5">
           <button
-            onClick={() => { setShowArchive(false); setShowTasks(true); setShowTemplates(false); setShowTimeStats(false); }}
+            onClick={() => { setShowArchive(false); setShowTasks(true); setShowTemplates(false); setShowHistory(false); }}
             className="w-full py-3 px-4 rounded-lg bg-primary text-primary-foreground font-medium shadow-sm active:scale-[0.98] transition-all"
           >
             Все задачи
           </button>
           <div className="grid grid-cols-2 gap-2.5">
             <button
-              onClick={() => { setShowArchive(true); setShowTasks(true); setShowTemplates(false); setShowTimeStats(false); }}
+              onClick={() => { setShowHistory(true); setShowTasks(false); setShowTemplates(false); }}
               className="py-3 px-4 rounded-lg bg-primary text-primary-foreground font-medium shadow-sm active:scale-[0.98] transition-all"
             >
-              История
+              📊 История
             </button>
             <button
               onClick={handleExport}
@@ -210,16 +210,10 @@ export default function App() {
           </div>
           <div className="grid grid-cols-2 gap-2.5">
             <button
-              onClick={() => { setShowTemplates(true); setShowTasks(false); setShowTimeStats(false); }}
+              onClick={() => { setShowTemplates(true); setShowTasks(false); setShowHistory(false); }}
               className="py-3 px-4 rounded-lg bg-muted text-muted-foreground font-medium shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2"
             >
               <Repeat size={16} /> Шаблоны
-            </button>
-            <button
-              onClick={() => { setShowTimeStats(true); setShowTasks(false); setShowTemplates(false); }}
-              className="py-3 px-4 rounded-lg bg-muted text-muted-foreground font-medium shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-            >
-              <BarChart3 size={16} /> Статистика
             </button>
           </div>
           <label className="w-full py-3 px-4 rounded-lg bg-muted text-muted-foreground font-medium text-center cursor-pointer shadow-sm active:scale-[0.98] transition-all">
