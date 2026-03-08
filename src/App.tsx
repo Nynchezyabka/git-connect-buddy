@@ -172,6 +172,7 @@ export default function App() {
         {/* Header */}
         <header className="text-center mb-4 pt-1 relative">
           <div className="absolute right-0 top-1 flex items-center gap-1.5">
+            <InfoButton />
             <NotificationButton />
             <ThemeToggle />
           </div>
