@@ -82,6 +82,37 @@ export function exportTasksToFile(tasks: Task[]) {
   URL.revokeObjectURL(url);
 }
 
+const VALID_CATEGORIES = [0, 1, 2, 3, 4, 5];
+const MAX_TEXT_LENGTH = 1000;
+const MAX_TASKS = 10000;
+
+function isValidTask(t: unknown): t is Task {
+  if (!t || typeof t !== "object") return false;
+  const o = t as Record<string, unknown>;
+  return (
+    typeof o.id === "number" &&
+    Number.isFinite(o.id) &&
+    typeof o.text === "string" &&
+    o.text.length <= MAX_TEXT_LENGTH &&
+    typeof o.category === "number" &&
+    VALID_CATEGORIES.includes(o.category) &&
+    typeof o.completed === "boolean" &&
+    typeof o.active === "boolean" &&
+    typeof o.statusChangedAt === "number" &&
+    (o.subcategory === undefined || (typeof o.subcategory === "string" && o.subcategory.length <= 200)) &&
+    (o.timeSpent === undefined || (typeof o.timeSpent === "number" && Number.isFinite(o.timeSpent) && o.timeSpent >= 0)) &&
+    (o.templateId === undefined || (typeof o.templateId === "number" && Number.isFinite(o.templateId)))
+  );
+}
+
+function sanitizeTask(t: Task): Task {
+  return {
+    ...t,
+    text: sanitize(t.text).slice(0, MAX_TEXT_LENGTH),
+    subcategory: t.subcategory ? sanitize(t.subcategory).slice(0, 200) : undefined,
+  };
+}
+
 export function importTasksFromFile(file: File): Promise<Task[]> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -92,7 +123,16 @@ export function importTasksFromFile(file: File): Promise<Task[]> {
           reject(new Error("Файл должен содержать массив задач"));
           return;
         }
-        resolve(data);
+        if (data.length > MAX_TASKS) {
+          reject(new Error(`Слишком много задач (макс. ${MAX_TASKS})`));
+          return;
+        }
+        const valid = data.filter(isValidTask).map(sanitizeTask);
+        if (valid.length === 0) {
+          reject(new Error("Файл не содержит валидных задач"));
+          return;
+        }
+        resolve(valid);
       } catch (err: any) {
         reject(new Error("Ошибка чтения: " + err.message));
       }
