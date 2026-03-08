@@ -19,6 +19,8 @@ export function TimerScreen({ task, onClose }: Props) {
   const endAtRef = useRef(0);
   const intervalRef = useRef<number | null>(null);
   const bgImage = useRef(getRandomBackgroundForCategory(task.category));
+  const elapsedRef = useRef(0); // total elapsed seconds this session
+  const sessionStartRef = useRef(0);
 
   const updateDisplay = useCallback(() => {
     if (endAtRef.current <= 0) return;
@@ -26,6 +28,11 @@ export function TimerScreen({ task, onClose }: Props) {
     setTimeLeft(remaining);
     if (remaining <= 0) {
       clearInterval(intervalRef.current!);
+      // Track elapsed time
+      if (sessionStartRef.current > 0) {
+        elapsedRef.current += Math.round((Date.now() - sessionStartRef.current) / 1000);
+        sessionStartRef.current = 0;
+      }
       setRunning(false);
       setFinished(true);
       if (soundEnabled) playWindChime();
@@ -39,11 +46,28 @@ export function TimerScreen({ task, onClose }: Props) {
     }
   }, [running, updateDisplay]);
 
+  const saveTimeSpent = useCallback(() => {
+    // Add any remaining running time
+    let total = elapsedRef.current;
+    if (sessionStartRef.current > 0) {
+      total += Math.round((Date.now() - sessionStartRef.current) / 1000);
+    }
+    if (total > 0) {
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === task.id
+            ? { ...t, timeSpent: (t.timeSpent ?? 0) + total }
+            : t
+        )
+      );
+    }
+  }, [task.id, setTasks]);
+
   const start = () => {
-    if (running) return;
-    if (finished) return;
+    if (running || finished) return;
     const total = timeLeft > 0 ? timeLeft : minutes * 60;
     endAtRef.current = Date.now() + total * 1000;
+    sessionStartRef.current = Date.now();
     setRunning(true);
   };
 
@@ -51,6 +75,11 @@ export function TimerScreen({ task, onClose }: Props) {
     if (!running) return;
     clearInterval(intervalRef.current!);
     const remaining = Math.max(0, Math.ceil((endAtRef.current - Date.now()) / 1000));
+    // Track elapsed
+    if (sessionStartRef.current > 0) {
+      elapsedRef.current += Math.round((Date.now() - sessionStartRef.current) / 1000);
+      sessionStartRef.current = 0;
+    }
     setTimeLeft(remaining);
     endAtRef.current = 0;
     setRunning(false);
@@ -58,6 +87,11 @@ export function TimerScreen({ task, onClose }: Props) {
 
   const reset = () => {
     clearInterval(intervalRef.current!);
+    // Don't lose already tracked time
+    if (sessionStartRef.current > 0) {
+      elapsedRef.current += Math.round((Date.now() - sessionStartRef.current) / 1000);
+      sessionStartRef.current = 0;
+    }
     setRunning(false);
     setFinished(false);
     endAtRef.current = 0;
@@ -65,6 +99,7 @@ export function TimerScreen({ task, onClose }: Props) {
   };
 
   const completeTask = () => {
+    saveTimeSpent();
     setTasks((prev) =>
       prev.map((t) =>
         t.id === task.id ? { ...t, completed: true, statusChangedAt: Date.now() } : t
@@ -74,12 +109,21 @@ export function TimerScreen({ task, onClose }: Props) {
   };
 
   const returnTask = () => {
+    saveTimeSpent();
     onClose();
   };
 
   const mins = Math.floor(timeLeft / 60);
   const secs = timeLeft % 60;
   const info = CATEGORIES[task.category];
+
+  // Show elapsed time
+  let currentElapsed = elapsedRef.current;
+  if (sessionStartRef.current > 0) {
+    currentElapsed += Math.round((Date.now() - sessionStartRef.current) / 1000);
+  }
+  const elapsedMins = Math.floor(currentElapsed / 60);
+  const elapsedSecs = currentElapsed % 60;
 
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/40">
@@ -95,7 +139,7 @@ export function TimerScreen({ task, onClose }: Props) {
         }}
       >
         <button
-          onClick={onClose}
+          onClick={returnTask}
           className="absolute top-4 right-4 p-2 rounded-full bg-white/60 active:bg-white/80"
         >
           <X size={20} />
@@ -108,12 +152,25 @@ export function TimerScreen({ task, onClose }: Props) {
         >
           {task.text}
         </div>
-        <div className="text-sm mb-6 opacity-80">{info.name}</div>
+        <div className="text-sm mb-4 opacity-80">{info.name}</div>
+
+        {/* Elapsed time indicator */}
+        {(task.timeSpent ?? 0) > 0 && (
+          <div className="text-xs mb-2 opacity-60 flex items-center gap-1">
+            ⏱ Ранее: {Math.floor((task.timeSpent ?? 0) / 60)}м
+          </div>
+        )}
 
         {/* Timer display */}
-        <div className="font-mono text-7xl font-bold mb-6 tracking-wider">
+        <div className="font-mono text-7xl font-bold mb-2 tracking-wider">
           {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}
         </div>
+
+        {currentElapsed > 0 && (
+          <div className="text-sm mb-4 opacity-60 font-mono">
+            ▶ {String(elapsedMins).padStart(2, "0")}:{String(elapsedSecs).padStart(2, "0")} в этой сессии
+          </div>
+        )}
 
         {!finished && (
           <>

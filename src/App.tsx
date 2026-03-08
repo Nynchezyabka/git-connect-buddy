@@ -1,13 +1,19 @@
 import { useState, useCallback, useEffect, createContext, useContext } from "react";
-import { Task, CategoryId } from "@/types";
+import { Task, TaskTemplate, CategoryId } from "@/types";
 import { initTaskStore, loadTasks, saveTasks, getNextId, exportTasksToFile, importTasksFromFile } from "@/lib/taskStore";
+import { dbGetMeta, dbSetMeta } from "@/lib/db";
 import { Dashboard } from "@/components/Dashboard";
 import { TaskListPanel } from "@/components/TaskListPanel";
 import { TimerScreen } from "@/components/TimerScreen";
 import { AddTaskModal } from "@/components/AddTaskModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationButton } from "@/components/NotificationButton";
+import { TemplatesPanel } from "@/components/TemplatesPanel";
+import { TimeStatsPanel } from "@/components/TimeStatsPanel";
+import { OnboardingScreen } from "@/components/OnboardingScreen";
+import { processRecurringTemplates } from "@/lib/recurring";
 import { toast } from "sonner";
+import { Repeat, BarChart3 } from "lucide-react";
 
 interface AppContextValue {
   tasks: Task[];
@@ -21,21 +27,58 @@ export const useApp = () => useContext(AppContext);
 
 export default function App() {
   const [tasks, setTasksRaw] = useState<Task[]>([]);
+  const [templates, setTemplatesRaw] = useState<TaskTemplate[]>([]);
   const [ready, setReady] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [showTasks, setShowTasks] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [showTimeStats, setShowTimeStats] = useState(false);
   const [timerTask, setTimerTask] = useState<Task | null>(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addModalCategory, setAddModalCategory] = useState<CategoryId>(0);
   const [addModalRestrict, setAddModalRestrict] = useState<CategoryId[] | null>(null);
 
-  // Initialize IndexedDB and load tasks
+  // Initialize IndexedDB and load tasks + templates
   useEffect(() => {
-    initTaskStore().then((loaded) => {
+    Promise.all([
+      initTaskStore(),
+      dbGetMeta<TaskTemplate[]>("templates"),
+    ]).then(([loaded, tpls]) => {
       setTasksRaw(loaded);
+      setTemplatesRaw(tpls ?? []);
+
+      // Check onboarding
+      if (!localStorage.getItem("onboarding_done") && loaded.length === 0) {
+        setShowOnboarding(true);
+      }
+
       setReady(true);
     });
   }, []);
+
+  // Process recurring templates on load and every 30 minutes
+  useEffect(() => {
+    if (!ready || templates.length === 0) return;
+
+    const process = () => {
+      const { newTasks, updatedTemplates } = processRecurringTemplates(templates, tasks);
+      if (newTasks.length > 0) {
+        let nextId = getNextId(tasks);
+        const tasksToAdd = newTasks.map((t) => ({ ...t, id: nextId++ }));
+        setTasks((prev) => [...prev, ...tasksToAdd]);
+        toast.info(`Создано ${newTasks.length} задач по шаблонам`);
+      }
+      if (updatedTemplates) {
+        setTemplatesRaw(updatedTemplates);
+        dbSetMeta("templates", updatedTemplates);
+      }
+    };
+
+    process();
+    const interval = setInterval(process, 30 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [ready, templates.length]); // eslint-disable-line
 
   const setTasks = useCallback((fn: (prev: Task[]) => Task[]) => {
     setTasksRaw((prev) => {
@@ -43,6 +86,11 @@ export default function App() {
       saveTasks(next);
       return next;
     });
+  }, []);
+
+  const saveTemplates = useCallback((tpls: TaskTemplate[]) => {
+    setTemplatesRaw(tpls);
+    dbSetMeta("templates", tpls);
   }, []);
 
   const openTimer = useCallback((task: Task) => {
@@ -114,6 +162,10 @@ export default function App() {
     );
   }
 
+  if (showOnboarding) {
+    return <OnboardingScreen onComplete={() => setShowOnboarding(false)} />;
+  }
+
   return (
     <AppContext.Provider value={ctx}>
       <div className="max-w-4xl mx-auto p-2.5">
@@ -134,14 +186,14 @@ export default function App() {
         {/* Controls */}
         <div className="flex flex-col gap-2.5 my-5">
           <button
-            onClick={() => { setShowArchive(false); setShowTasks(true); }}
+            onClick={() => { setShowArchive(false); setShowTasks(true); setShowTemplates(false); setShowTimeStats(false); }}
             className="w-full py-3 px-4 rounded-lg bg-primary text-primary-foreground font-medium shadow-sm active:scale-[0.98] transition-all"
           >
             Все задачи
           </button>
           <div className="grid grid-cols-2 gap-2.5">
             <button
-              onClick={() => { setShowArchive(true); setShowTasks(true); }}
+              onClick={() => { setShowArchive(true); setShowTasks(true); setShowTemplates(false); setShowTimeStats(false); }}
               className="py-3 px-4 rounded-lg bg-primary text-primary-foreground font-medium shadow-sm active:scale-[0.98] transition-all"
             >
               История
@@ -151,6 +203,20 @@ export default function App() {
               className="py-3 px-4 rounded-lg bg-primary text-primary-foreground font-medium shadow-sm active:scale-[0.98] transition-all"
             >
               Скачать задачи
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-2.5">
+            <button
+              onClick={() => { setShowTemplates(true); setShowTasks(false); setShowTimeStats(false); }}
+              className="py-3 px-4 rounded-lg bg-muted text-muted-foreground font-medium shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            >
+              <Repeat size={16} /> Шаблоны
+            </button>
+            <button
+              onClick={() => { setShowTimeStats(true); setShowTasks(false); setShowTemplates(false); }}
+              className="py-3 px-4 rounded-lg bg-muted text-muted-foreground font-medium shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            >
+              <BarChart3 size={16} /> Статистика
             </button>
           </div>
           <label className="w-full py-3 px-4 rounded-lg bg-muted text-muted-foreground font-medium text-center cursor-pointer shadow-sm active:scale-[0.98] transition-all">
@@ -167,6 +233,20 @@ export default function App() {
             />
           </label>
         </div>
+
+        {/* Templates panel */}
+        {showTemplates && (
+          <TemplatesPanel
+            templates={templates}
+            onSave={saveTemplates}
+            onClose={() => setShowTemplates(false)}
+          />
+        )}
+
+        {/* Time stats panel */}
+        {showTimeStats && (
+          <TimeStatsPanel onClose={() => setShowTimeStats(false)} />
+        )}
 
         {/* Task list panel */}
         {showTasks && (
