@@ -12,7 +12,6 @@ import { InfoButton } from "@/components/InfoButton";
 import { TemplatesPanel } from "@/components/TemplatesPanel";
 import { HistoryModal } from "@/components/HistoryModal";
 import { OnboardingScreen } from "@/components/OnboardingScreen";
-import { OnboardingScreen } from "@/components/OnboardingScreen";
 import { processRecurringTemplates } from "@/lib/recurring";
 import { toast } from "sonner";
 import { Repeat } from "lucide-react";
