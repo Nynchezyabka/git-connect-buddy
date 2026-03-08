@@ -240,7 +240,7 @@ export function HistoryModal({ onClose }: Props) {
                   <div key={task.id} className="relative mb-2.5 last:mb-0">
                     {/* Dot on timeline */}
                     <div className={cn(
-                      "absolute -left-3 top-2 w-2.5 h-2.5 rounded-full border-2 border-background",
+                      "absolute -left-3.5 top-2 w-3.5 h-3.5 rounded-full border-2 border-background",
                       DOT_COLORS[task.category]
                     )} />
 
