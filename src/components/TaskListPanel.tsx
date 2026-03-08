@@ -167,50 +167,70 @@ export function TaskListPanel({ showArchive, onClose }: Props) {
         });
 
         return (
-          <div key={cat} className="mb-4 animate-fade-in">
+          <div key={cat} className="mb-4 animate-fade-in bg-white/30 rounded-lg p-2 border border-border/50">
             <div className="flex items-center gap-2 mb-2">
-              <CategoryIcon category={cat} size={18} />
-              <span className="font-semibold text-sm">{info.name}</span>
+              <button 
+                onClick={() => toggleCat(cat)}
+                className="flex items-center gap-2 flex-1 text-left p-1 rounded hover:bg-black/5"
+              >
+                <CategoryIcon category={cat} size={18} />
+                <span className="font-semibold text-sm">{info.name} <span className="text-xs font-normal opacity-60">({catTasks.length})</span></span>
+              </button>
               {!showArchive && (
                 <button
                   onClick={() => openAddModal(cat)}
-                  className="ml-auto p-1 rounded active:bg-muted"
+                  className="ml-auto p-1.5 rounded-md hover:bg-black/5 active:bg-black/10 transition-colors"
                 >
-                  <Plus size={14} />
+                  <Plus size={16} />
                 </button>
               )}
             </div>
-            {subKeys.map((sub) => (
-              <div key={sub || "__none"} className="mb-2">
-                {sub && (
-                  <p className="text-xs font-medium text-muted-foreground ml-1 mb-1 uppercase tracking-wide">
-                    {sub}
-                  </p>
-                )}
-                <div className="flex flex-col gap-1.5">
-                  {subGroups.get(sub)!.map((task) => (
-                    <TaskCard
-                      key={task.id}
-                      task={task}
-                      showArchive={showArchive}
-                      isDragOver={dragOverId === task.id}
-                      onStart={() => openTimer(task)}
-                      onToggle={() => toggleActive(task.id)}
-                      onDelete={() => deleteTask(task.id)}
-                      onComplete={() => completeTask(task.id)}
-                      onReturn={() => returnTask(task.id)}
-                      onChangeCategory={(newCat) => changeCategory(task.id, newCat)}
-                      onUpdateText={(text) => updateTaskText(task.id, text)}
-                      onUpdateSubcategory={(sub) => updateTaskSubcategory(task.id, sub)}
-                      onDragStart={() => setDragId(task.id)}
-                      onDragOver={() => setDragOverId(task.id)}
-                      onDrop={() => handleDrop(task.id)}
-                      onDragEnd={() => { setDragId(null); setDragOverId(null); }}
-                    />
-                  ))}
-                </div>
+            
+            {!collapsedCats.has(cat) && (
+              <div className="pl-1 space-y-3 mt-2">
+                {subKeys.map((sub) => {
+                  const subKey = `${cat}-${sub}`;
+                  const isCollapsed = collapsedSubs.has(subKey);
+                  return (
+                    <div key={sub || "__none"}>
+                      {sub && (
+                        <button 
+                          onClick={() => toggleSub(cat, sub)}
+                          className="flex items-center gap-1.5 w-full text-left text-sm font-medium text-foreground/80 mb-1.5 hover:text-foreground hover:bg-black/5 p-1 rounded transition-colors"
+                        >
+                          <span className="w-4 text-center">{isCollapsed ? "+" : "−"}</span>
+                          {sub} <span className="text-xs font-normal opacity-50">({subGroups.get(sub)!.length})</span>
+                        </button>
+                      )}
+                      {(!sub || !isCollapsed) && (
+                        <div className="flex flex-col gap-2">
+                          {subGroups.get(sub)!.map((task) => (
+                            <TaskCard
+                              key={task.id}
+                              task={task}
+                              showArchive={showArchive}
+                              isDragOver={dragOverId === task.id}
+                              onStart={() => openTimer(task)}
+                              onToggle={() => toggleActive(task.id)}
+                              onDelete={() => deleteTask(task.id)}
+                              onComplete={() => completeTask(task.id)}
+                              onReturn={() => returnTask(task.id)}
+                              onChangeCategory={(newCat) => changeCategory(task.id, newCat)}
+                              onUpdateText={(text) => updateTaskText(task.id, text)}
+                              onUpdateSubcategory={(sub) => updateTaskSubcategory(task.id, sub)}
+                              onDragStart={() => setDragId(task.id)}
+                              onDragOver={() => setDragOverId(task.id)}
+                              onDrop={() => handleDrop(task.id)}
+                              onDragEnd={() => { setDragId(null); setDragOverId(null); }}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-            ))}
+            )}
           </div>
         );
       })}
