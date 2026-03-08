@@ -240,9 +240,9 @@ export default function App() {
           />
         )}
 
-        {/* Time stats panel */}
-        {showTimeStats && (
-          <TimeStatsPanel onClose={() => setShowTimeStats(false)} />
+        {/* History modal */}
+        {showHistory && (
+          <HistoryModal onClose={() => setShowHistory(false)} />
         )}
 
         {/* Task list panel */}
