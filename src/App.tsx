@@ -8,6 +8,7 @@ import { TimerScreen } from "@/components/TimerScreen";
 import { AddTaskModal } from "@/components/AddTaskModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationButton } from "@/components/NotificationButton";
+import { InfoButton } from "@/components/InfoButton";
 import { TemplatesPanel } from "@/components/TemplatesPanel";
 import { TimeStatsPanel } from "@/components/TimeStatsPanel";
 import { OnboardingScreen } from "@/components/OnboardingScreen";
@@ -172,6 +173,7 @@ export default function App() {
         {/* Header */}
         <header className="text-center mb-4 pt-1 relative">
           <div className="absolute right-0 top-1 flex items-center gap-1.5">
+            <InfoButton />
             <NotificationButton />
             <ThemeToggle />
           </div>
