@@ -94,6 +94,21 @@ export function TaskListPanel({ showArchive, onClose }: Props) {
           return (a.statusChangedAt || 0) - (b.statusChangedAt || 0);
         });
         const info = CATEGORIES[cat];
+
+        // Group by subcategory
+        const subGroups = new Map<string, Task[]>();
+        catTasks.forEach((t) => {
+          const sub = t.subcategory || "";
+          if (!subGroups.has(sub)) subGroups.set(sub, []);
+          subGroups.get(sub)!.push(t);
+        });
+        // Sort: named subcategories first (alphabetically), then unnamed
+        const subKeys = Array.from(subGroups.keys()).sort((a, b) => {
+          if (!a) return 1;
+          if (!b) return -1;
+          return a.localeCompare(b, "ru");
+        });
+
         return (
           <div key={cat} className="mb-4">
             <div className="flex items-center gap-2 mb-2">
@@ -108,21 +123,30 @@ export function TaskListPanel({ showArchive, onClose }: Props) {
                 </button>
               )}
             </div>
-            <div className="flex flex-col gap-1.5">
-              {catTasks.map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  showArchive={showArchive}
-                  onStart={() => openTimer(task)}
-                  onToggle={() => toggleActive(task.id)}
-                  onDelete={() => deleteTask(task.id)}
-                  onComplete={() => completeTask(task.id)}
-                  onReturn={() => returnTask(task.id)}
-                  onChangeCategory={(newCat) => changeCategory(task.id, newCat)}
-                />
-              ))}
-            </div>
+            {subKeys.map((sub) => (
+              <div key={sub || "__none"} className="mb-2">
+                {sub && (
+                  <p className="text-xs font-medium text-muted-foreground ml-1 mb-1 uppercase tracking-wide">
+                    {sub}
+                  </p>
+                )}
+                <div className="flex flex-col gap-1.5">
+                  {subGroups.get(sub)!.map((task) => (
+                    <TaskCard
+                      key={task.id}
+                      task={task}
+                      showArchive={showArchive}
+                      onStart={() => openTimer(task)}
+                      onToggle={() => toggleActive(task.id)}
+                      onDelete={() => deleteTask(task.id)}
+                      onComplete={() => completeTask(task.id)}
+                      onReturn={() => returnTask(task.id)}
+                      onChangeCategory={(newCat) => changeCategory(task.id, newCat)}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         );
       })}
