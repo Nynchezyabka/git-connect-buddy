@@ -1,48 +1,60 @@
 import { Task, CategoryId } from "@/types";
+import { dbSaveTasks, dbLoadTasksOrdered, dbGetMeta, dbSetMeta, migrateFromLocalStorage } from "@/lib/db";
 
-const STORAGE_KEY = "tasks";
-const CUSTOM_SUBS_KEY = "customSubcategories";
+// In-memory cache for sync access
+let cachedTasks: Task[] = [];
+let initialized = false;
+
+export async function initTaskStore(): Promise<Task[]> {
+  if (initialized) return cachedTasks;
+
+  // One-time migration from localStorage
+  if (!localStorage.getItem("idb_migrated")) {
+    const migrated = await migrateFromLocalStorage();
+    if (migrated) {
+      cachedTasks = migrated;
+      initialized = true;
+      return cachedTasks;
+    }
+  }
+
+  cachedTasks = await dbLoadTasksOrdered();
+  initialized = true;
+  return cachedTasks;
+}
 
 export function loadTasks(): Task[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    const valid = new Set([0, 1, 2, 3, 4, 5]);
-    return parsed.map((t: any) => {
-      const n = parseInt(t.category);
-      const category = (Number.isFinite(n) && valid.has(n)) ? n as CategoryId : 0;
-      const active = typeof t.active === "boolean" ? t.active : true;
-      const text = sanitize(t.text);
-      return { ...t, text, category, active };
-    });
-  } catch {
-    return [];
-  }
+  // Sync fallback for initial render (returns cached or empty)
+  return cachedTasks;
 }
 
 export function saveTasks(tasks: Task[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-  } catch {}
+  cachedTasks = tasks;
+  // Async save to IndexedDB
+  dbSaveTasks(tasks).catch(() => {});
 }
 
 export function getNextId(tasks: Task[]): number {
   return tasks.reduce((max, t) => Math.max(max, t.id), 0) + 1;
 }
 
-export function getCustomSubcategories(): Record<string, string[]> {
+export async function getCustomSubcategories(): Promise<Record<string, string[]>> {
+  const result = await dbGetMeta<Record<string, string[]>>("customSubcategories");
+  return result ?? {};
+}
+
+export function getCustomSubcategoriesSync(): Record<string, string[]> {
+  // Sync fallback - try localStorage first, then return empty
   try {
-    const raw = localStorage.getItem(CUSTOM_SUBS_KEY);
+    const raw = localStorage.getItem("customSubcategories");
     return raw ? JSON.parse(raw) : {};
   } catch {
     return {};
   }
 }
 
-export function saveCustomSubcategories(subs: Record<string, string[]>) {
-  localStorage.setItem(CUSTOM_SUBS_KEY, JSON.stringify(subs));
+export async function saveCustomSubcategories(subs: Record<string, string[]>) {
+  await dbSetMeta("customSubcategories", subs);
 }
 
 function sanitize(s: unknown): string {

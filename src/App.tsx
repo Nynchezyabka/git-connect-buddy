@@ -1,11 +1,12 @@
-import { useState, useCallback, useRef, createContext, useContext } from "react";
-import { Task, CategoryId, CATEGORIES, SECTIONS } from "@/types";
-import { loadTasks, saveTasks, getNextId, exportTasksToFile, importTasksFromFile } from "@/lib/taskStore";
+import { useState, useCallback, useEffect, createContext, useContext } from "react";
+import { Task, CategoryId } from "@/types";
+import { initTaskStore, loadTasks, saveTasks, getNextId, exportTasksToFile, importTasksFromFile } from "@/lib/taskStore";
 import { Dashboard } from "@/components/Dashboard";
 import { TaskListPanel } from "@/components/TaskListPanel";
 import { TimerScreen } from "@/components/TimerScreen";
 import { AddTaskModal } from "@/components/AddTaskModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { NotificationButton } from "@/components/NotificationButton";
 import { toast } from "sonner";
 
 interface AppContextValue {
@@ -19,13 +20,22 @@ export const AppContext = createContext<AppContextValue>(null!);
 export const useApp = () => useContext(AppContext);
 
 export default function App() {
-  const [tasks, setTasksRaw] = useState<Task[]>(() => loadTasks());
+  const [tasks, setTasksRaw] = useState<Task[]>([]);
+  const [ready, setReady] = useState(false);
   const [showTasks, setShowTasks] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
   const [timerTask, setTimerTask] = useState<Task | null>(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addModalCategory, setAddModalCategory] = useState<CategoryId>(0);
   const [addModalRestrict, setAddModalRestrict] = useState<CategoryId[] | null>(null);
+
+  // Initialize IndexedDB and load tasks
+  useEffect(() => {
+    initTaskStore().then((loaded) => {
+      setTasksRaw(loaded);
+      setReady(true);
+    });
+  }, []);
 
   const setTasks = useCallback((fn: (prev: Task[]) => Task[]) => {
     setTasksRaw((prev) => {
@@ -96,12 +106,21 @@ export default function App() {
 
   const ctx: AppContextValue = { tasks, setTasks, openTimer, openAddModal };
 
+  if (!ready) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-primary animate-pulse text-xl font-display">🎁 Загрузка...</div>
+      </div>
+    );
+  }
+
   return (
     <AppContext.Provider value={ctx}>
       <div className="max-w-4xl mx-auto p-2.5">
         {/* Header */}
         <header className="text-center mb-4 pt-1 relative">
-          <div className="absolute right-0 top-1">
+          <div className="absolute right-0 top-1 flex items-center gap-1.5">
+            <NotificationButton />
             <ThemeToggle />
           </div>
           <h1 className="font-display text-4xl text-primary drop-shadow-sm animate-fade-in">
