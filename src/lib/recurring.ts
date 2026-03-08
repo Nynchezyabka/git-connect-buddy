@@ -44,7 +44,6 @@ export function processRecurringTemplates(
     if (alreadyExists) return tpl;
 
     newTasks.push({
-      id: 0, // Will be assigned later
       text: tpl.text,
       category: tpl.category,
       subcategory: tpl.subcategory,
