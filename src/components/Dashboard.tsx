@@ -3,7 +3,7 @@ import { useApp } from "@/App";
 import { cn } from "@/lib/utils";
 import {
   CircleCheck, Shield, Smile, GraduationCap, Heart, CircleHelp,
-  Dice5, Plus,
+  Dices, Plus,
 } from "lucide-react";
 
 const sectionColors: Record<string, string> = {
