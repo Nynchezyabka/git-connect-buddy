@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { CategoryId, CATEGORIES } from "@/types";
+import { CategoryId, CATEGORIES, DEFAULT_SUBCATEGORIES } from "@/types";
+import { getCustomSubcategories, saveCustomSubcategories } from "@/lib/taskStore";
 import { cn } from "@/lib/utils";
-import { X } from "lucide-react";
+import { X, Plus } from "lucide-react";
 
 interface Props {
   defaultCategory: CategoryId;
