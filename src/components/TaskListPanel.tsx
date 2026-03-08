@@ -17,6 +17,8 @@ export function TaskListPanel({ showArchive, onClose }: Props) {
   const { tasks, setTasks, openTimer, openAddModal } = useApp();
   const [dragId, setDragId] = useState<number | null>(null);
   const [dragOverId, setDragOverId] = useState<number | null>(null);
+  const [collapsedCats, setCollapsedCats] = useState<Set<CategoryId>>(new Set());
+  const [collapsedSubs, setCollapsedSubs] = useState<Set<string>>(new Set());
 
   const source = tasks.filter((t) => (showArchive ? t.completed : !t.completed));
 
