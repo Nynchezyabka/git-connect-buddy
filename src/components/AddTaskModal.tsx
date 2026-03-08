@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { CategoryId, CATEGORIES } from "@/types";
+import { CategoryId, CATEGORIES, DEFAULT_SUBCATEGORIES } from "@/types";
+import { getCustomSubcategories, saveCustomSubcategories } from "@/lib/taskStore";
 import { cn } from "@/lib/utils";
-import { X } from "lucide-react";
+import { X, Plus } from "lucide-react";
 
 interface Props {
   defaultCategory: CategoryId;
@@ -13,13 +14,44 @@ interface Props {
 export function AddTaskModal({ defaultCategory, restrictCategories, onAdd, onClose }: Props) {
   const [text, setText] = useState("");
   const [category, setCategory] = useState<CategoryId>(defaultCategory);
+  const [subcategory, setSubcategory] = useState<string>("");
+  const [customSubInput, setCustomSubInput] = useState("");
+  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [customSubs, setCustomSubs] = useState(() => getCustomSubcategories());
   const textRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     textRef.current?.focus();
   }, []);
 
+  useEffect(() => {
+    setSubcategory("");
+    setShowCustomInput(false);
+  }, [category]);
+
   const cats = restrictCategories ?? ([0, 1, 2, 5, 3, 4] as CategoryId[]);
+
+  const getSubcategories = (cat: CategoryId): string[] => {
+    const defaults = DEFAULT_SUBCATEGORIES[cat] || [];
+    const custom = customSubs[String(cat)] || [];
+    return [...defaults, ...custom.filter((c) => !defaults.includes(c))];
+  };
+
+  const addCustomSubcategory = () => {
+    const val = customSubInput.trim();
+    if (!val) return;
+    const key = String(category);
+    const updated = { ...customSubs };
+    if (!updated[key]) updated[key] = [];
+    if (!updated[key].includes(val) && !(DEFAULT_SUBCATEGORIES[category] || []).includes(val)) {
+      updated[key] = [...updated[key], val];
+      setCustomSubs(updated);
+      saveCustomSubcategories(updated);
+    }
+    setSubcategory(val);
+    setCustomSubInput("");
+    setShowCustomInput(false);
+  };
 
   const catBgMap: Record<CategoryId, string> = {
     0: "bg-cat-0-bg",
@@ -41,7 +73,7 @@ export function AddTaskModal({ defaultCategory, restrictCategories, onAdd, onClo
 
   const handleSubmit = () => {
     if (!text.trim()) return;
-    onAdd(text, category);
+    onAdd(text, category, subcategory || undefined);
     setText("");
     textRef.current?.focus();
   };
@@ -50,7 +82,7 @@ export function AddTaskModal({ defaultCategory, restrictCategories, onAdd, onClo
     <div className="fixed inset-0 z-[10100] flex items-center justify-center bg-black/40 p-4">
       <div
         className={cn(
-          "w-full max-w-md rounded-xl p-5 shadow-lg relative",
+          "w-full max-w-md rounded-xl p-5 shadow-lg relative max-h-[90vh] overflow-y-auto",
           catBgMap[category]
         )}
       >
@@ -89,6 +121,66 @@ export function AddTaskModal({ defaultCategory, restrictCategories, onAdd, onClo
             </button>
           ))}
         </div>
+
+        {/* Subcategory picker */}
+        {getSubcategories(category).length > 0 && (
+          <div className="mt-2.5">
+            <div className="text-xs text-foreground/60 mb-1">Подкатегория:</div>
+            <div className="flex flex-wrap gap-1.5">
+              <button
+                onClick={() => setSubcategory("")}
+                className={cn(
+                  "text-xs px-2 py-1 rounded-full border transition-all",
+                  !subcategory
+                    ? "border-foreground/30 bg-white/60 font-semibold"
+                    : "border-transparent bg-white/30 opacity-70 hover:opacity-100"
+                )}
+              >
+                Без подкатегории
+              </button>
+              {getSubcategories(category).map((sub) => (
+                <button
+                  key={sub}
+                  onClick={() => setSubcategory(sub)}
+                  className={cn(
+                    "text-xs px-2 py-1 rounded-full border transition-all",
+                    subcategory === sub
+                      ? "border-foreground/30 bg-white/60 font-semibold"
+                      : "border-transparent bg-white/30 opacity-70 hover:opacity-100"
+                  )}
+                >
+                  {sub}
+                </button>
+              ))}
+              {!showCustomInput ? (
+                <button
+                  onClick={() => setShowCustomInput(true)}
+                  className="text-xs px-2 py-1 rounded-full border border-dashed border-foreground/20 bg-white/20 opacity-70 hover:opacity-100 flex items-center gap-0.5"
+                >
+                  <Plus size={10} /> Своя
+                </button>
+              ) : (
+                <div className="flex items-center gap-1">
+                  <input
+                    type="text"
+                    value={customSubInput}
+                    onChange={(e) => setCustomSubInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && addCustomSubcategory()}
+                    placeholder="Название..."
+                    className="text-xs px-2 py-1 rounded-full border border-foreground/20 bg-white/60 w-24"
+                    autoFocus
+                  />
+                  <button
+                    onClick={addCustomSubcategory}
+                    className="text-xs px-2 py-1 rounded-full bg-primary text-primary-foreground"
+                  >
+                    OK
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="flex gap-2.5 mt-4">
           <button

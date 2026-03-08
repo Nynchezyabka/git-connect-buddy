@@ -172,6 +172,9 @@ function TaskCard({ task, showArchive, onStart, onToggle, onDelete, onComplete, 
       <div className="flex items-start gap-2">
         <p className={cn("flex-1 text-sm leading-snug break-words", task.completed && "line-through")}>
           {task.text}
+          {task.subcategory && (
+            <span className="ml-1.5 text-xs opacity-60 italic">({task.subcategory})</span>
+          )}
         </p>
         <div className="flex items-center gap-1 shrink-0">
           {!showArchive && (

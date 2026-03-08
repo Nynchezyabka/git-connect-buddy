@@ -35,6 +35,15 @@ export const CATEGORY_ASSET_MAP: Record<number, string> = {
   5: "accessibility_joys_light_blue",
 };
 
+// Predefined subcategories per category
+export const DEFAULT_SUBCATEGORIES: Partial<Record<CategoryId, string[]>> = {
+  1: ["Работа", "Дом", "Здоровье", "Финансы", "Учёба"],
+  2: ["Финансовая подушка", "Здоровье", "Документы", "Страхование", "Навыки"],
+  3: ["Природа", "Творчество", "Спорт", "Кулинария", "Чтение", "Музыка"],
+  4: ["Карьера", "Образование", "Достижения", "Признание", "Проекты"],
+  5: ["Время", "Деньги", "Энергия", "Пространство", "Инструменты"],
+};
+
 // Section definitions for the dashboard
 export interface SectionDef {
   categories: CategoryId[];
