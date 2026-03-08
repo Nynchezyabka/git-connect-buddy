@@ -5,6 +5,7 @@ import { Dashboard } from "@/components/Dashboard";
 import { TaskListPanel } from "@/components/TaskListPanel";
 import { TimerScreen } from "@/components/TimerScreen";
 import { AddTaskModal } from "@/components/AddTaskModal";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
 
 interface AppContextValue {
@@ -100,7 +101,10 @@ export default function App() {
       <div className="max-w-4xl mx-auto p-2.5">
         {/* Header */}
         <header className="text-center mb-4 pt-1 relative">
-          <h1 className="font-display text-4xl text-primary drop-shadow-sm">
+          <div className="absolute right-0 top-1">
+            <ThemeToggle />
+          </div>
+          <h1 className="font-display text-4xl text-primary drop-shadow-sm animate-fade-in">
             🎁 КОРОБОЧКА 5.0
           </h1>
         </header>

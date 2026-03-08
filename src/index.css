@@ -26,6 +26,66 @@
 
   --font-display: "Caveat", cursive;
   --font-body: "Montserrat", system-ui, sans-serif;
+
+  /* Animations */
+  --animate-fade-in: fade-in 0.3s ease-out;
+  --animate-fade-out: fade-out 0.3s ease-out;
+  --animate-scale-in: scale-in 0.2s ease-out;
+  --animate-scale-out: scale-out 0.2s ease-out;
+  --animate-slide-in-right: slide-in-right 0.3s ease-out;
+  --animate-slide-out-right: slide-out-right 0.3s ease-out;
+  --animate-enter: fade-in 0.3s ease-out, scale-in 0.2s ease-out;
+
+  @keyframes fade-in {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade-out {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(10px); }
+  }
+  @keyframes scale-in {
+    0% { transform: scale(0.95); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes scale-out {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0.95); opacity: 0; }
+  }
+  @keyframes slide-in-right {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(0); }
+  }
+  @keyframes slide-out-right {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(100%); }
+  }
+}
+
+/* Dark theme */
+.dark {
+  --color-background: hsl(20 10% 12%);
+  --color-foreground: hsl(36 30% 88%);
+  --color-primary: hsl(36 40% 70%);
+  --color-primary-foreground: hsl(20 10% 12%);
+  --color-muted: hsl(20 8% 22%);
+  --color-muted-foreground: hsl(30 10% 55%);
+  --color-accent: hsl(45 80% 55%);
+  --color-accent-foreground: hsl(20 10% 12%);
+  --color-border: hsl(20 8% 28%);
+
+  --color-cat-0: #757575;
+  --color-cat-0-bg: #2a2a2a;
+  --color-cat-1: #F9A825;
+  --color-cat-1-bg: #3d3520;
+  --color-cat-2: #42A5F5;
+  --color-cat-2-bg: #1a2d3d;
+  --color-cat-3: #66BB6A;
+  --color-cat-3-bg: #1e3020;
+  --color-cat-4: #EF5350;
+  --color-cat-4-bg: #3d1a1a;
+  --color-cat-5: #7E57C2;
+  --color-cat-5-bg: #2a1f3d;
 }
 
 body {
@@ -38,9 +98,25 @@ body {
   background-size: 20px 20px;
   line-height: 1.4;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark body,
+body:is(.dark *) {
+  background-image:
+    linear-gradient(rgba(80, 70, 50, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(80, 70, 50, 0.15) 1px, transparent 1px);
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: hsl(16 21% 29% / 0.2); border-radius: 3px; }
+
+/* Hover scale utility */
+.hover-scale {
+  transition: transform 0.2s ease;
+}
+.hover-scale:hover {
+  transform: scale(1.03);
+}
