@@ -172,7 +172,7 @@ export default function App() {
       <div className="max-w-4xl mx-auto p-2.5">
         {/* Header */}
         <header className="text-center mb-4 pt-1 relative">
-          <div className="absolute right-0 top-1 flex items-center gap-1.5">
+          <div className="absolute right-0 top-1 flex items-center gap-1.5 z-10">
             <InfoButton />
             <NotificationButton />
             <ThemeToggle />
