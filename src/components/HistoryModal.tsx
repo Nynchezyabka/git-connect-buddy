@@ -1,0 +1,362 @@
+import { useState, useMemo } from "react";
+import { Task, CATEGORIES, CategoryId } from "@/types";
+import { useApp } from "@/App";
+import { CategoryIcon } from "@/components/CategoryIcon";
+import { X, ChevronLeft, ChevronRight, Plus, Clock } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface Props {
+  onClose: () => void;
+}
+
+const MONTH_NAMES = [
+  "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+  "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь",
+];
+const WEEKDAY_HEADERS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+
+function dateKey(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function formatTime(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h > 0) return `${h}ч ${m}м`;
+  return `${m}м`;
+}
+
+function formatHHMM(date: Date): string {
+  return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+}
+
+// Category colors for sticker backgrounds
+const CAT_COLORS: Record<CategoryId, { bg: string; border: string }> = {
+  0: { bg: "bg-[var(--color-cat-0-bg)]", border: "border-[var(--color-cat-0)]" },
+  1: { bg: "bg-[var(--color-cat-1-bg)]", border: "border-[var(--color-cat-1)]" },
+  2: { bg: "bg-[var(--color-cat-2-bg)]", border: "border-[var(--color-cat-2)]" },
+  3: { bg: "bg-[var(--color-cat-3-bg)]", border: "border-[var(--color-cat-3)]" },
+  4: { bg: "bg-[var(--color-cat-4-bg)]", border: "border-[var(--color-cat-4)]" },
+  5: { bg: "bg-[var(--color-cat-5-bg)]", border: "border-[var(--color-cat-5)]" },
+};
+
+const DOT_COLORS: Record<CategoryId, string> = {
+  0: "bg-[var(--color-cat-0)]",
+  1: "bg-[var(--color-cat-1)]",
+  2: "bg-[var(--color-cat-2)]",
+  3: "bg-[var(--color-cat-3)]",
+  4: "bg-[var(--color-cat-4)]",
+  5: "bg-[var(--color-cat-5)]",
+};
+
+export function HistoryModal({ onClose }: Props) {
+  const { tasks, setTasks } = useApp();
+  const today = new Date();
+  const [viewMonth, setViewMonth] = useState(today.getMonth());
+  const [viewYear, setViewYear] = useState(today.getFullYear());
+  const [selectedDate, setSelectedDate] = useState<string>(dateKey(today));
+
+  // Manual entry state
+  const [manualText, setManualText] = useState("");
+  const [manualCategory, setManualCategory] = useState<CategoryId>(1);
+  const [manualDuration, setManualDuration] = useState(15);
+  const [manualHour, setManualHour] = useState(12);
+  const [manualMinute, setManualMinute] = useState(0);
+
+  // Group completed tasks by date
+  const tasksByDate = useMemo(() => {
+    const map = new Map<string, Task[]>();
+    tasks.forEach((t) => {
+      if (t.completed && t.statusChangedAt) {
+        const d = new Date(t.statusChangedAt);
+        const key = dateKey(d);
+        if (!map.has(key)) map.set(key, []);
+        map.get(key)!.push(t);
+      }
+    });
+    // Sort each day's tasks by statusChangedAt
+    map.forEach((arr) => arr.sort((a, b) => a.statusChangedAt - b.statusChangedAt));
+    return map;
+  }, [tasks]);
+
+  // Calendar grid
+  const calendarDays = useMemo(() => {
+    const firstDay = new Date(viewYear, viewMonth, 1);
+    const lastDay = new Date(viewYear, viewMonth + 1, 0);
+    let startWeekday = firstDay.getDay(); // 0=Sun
+    startWeekday = startWeekday === 0 ? 6 : startWeekday - 1; // convert to Mon=0
+
+    const days: (number | null)[] = [];
+    for (let i = 0; i < startWeekday; i++) days.push(null);
+    for (let d = 1; d <= lastDay.getDate(); d++) days.push(d);
+    return days;
+  }, [viewMonth, viewYear]);
+
+  const selectedTasks = tasksByDate.get(selectedDate) ?? [];
+  const selectedTotalTime = selectedTasks.reduce((s, t) => s + (t.timeSpent ?? 0), 0);
+
+  const prevMonth = () => {
+    if (viewMonth === 0) { setViewMonth(11); setViewYear(viewYear - 1); }
+    else setViewMonth(viewMonth - 1);
+  };
+  const nextMonth = () => {
+    if (viewMonth === 11) { setViewMonth(0); setViewYear(viewYear + 1); }
+    else setViewMonth(viewMonth + 1);
+  };
+
+  const handleAddManual = () => {
+    if (!manualText.trim()) return;
+    const [year, month, day] = selectedDate.split("-").map(Number);
+    const completedAt = new Date(year, month - 1, day, manualHour, manualMinute).getTime();
+
+    setTasks((prev) => {
+      const maxId = prev.reduce((m, t) => Math.max(m, t.id), 0);
+      const newTask: Task = {
+        id: maxId + 1,
+        text: manualText.trim(),
+        category: manualCategory,
+        completed: true,
+        active: false,
+        statusChangedAt: completedAt,
+        timeSpent: manualDuration * 60,
+      };
+      return [...prev, newTask];
+    });
+
+    setManualText("");
+    setManualDuration(15);
+  };
+
+  // Format selected date for display
+  const selParts = selectedDate.split("-").map(Number);
+  const selDateObj = new Date(selParts[0], selParts[1] - 1, selParts[2]);
+  const selDateStr = `${selParts[2]} ${MONTH_NAMES[selParts[1] - 1]} ${selParts[0]}`;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3" onClick={onClose}>
+      <div
+        className="bg-background rounded-2xl shadow-xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 relative animate-scale-in"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 p-1.5 rounded-full bg-muted text-muted-foreground hover:bg-border transition-colors z-10"
+        >
+          <X size={18} />
+        </button>
+
+        <h2 className="font-display text-2xl text-primary mb-4">📊 История и статистика</h2>
+
+        {/* Calendar */}
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <button onClick={prevMonth} className="p-1.5 rounded-md hover:bg-muted transition-colors">
+              <ChevronLeft size={18} />
+            </button>
+            <span className="font-semibold text-sm">
+              {MONTH_NAMES[viewMonth]} {viewYear}
+            </span>
+            <button onClick={nextMonth} className="p-1.5 rounded-md hover:bg-muted transition-colors">
+              <ChevronRight size={18} />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-7 gap-0.5 text-center">
+            {WEEKDAY_HEADERS.map((wd) => (
+              <div key={wd} className="text-[10px] font-semibold text-muted-foreground py-1">{wd}</div>
+            ))}
+            {calendarDays.map((day, i) => {
+              if (day === null) return <div key={`e-${i}`} />;
+              const key = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+              const count = tasksByDate.get(key)?.length ?? 0;
+              const isSelected = key === selectedDate;
+              const isToday = key === dateKey(today);
+              return (
+                <button
+                  key={key}
+                  onClick={() => setSelectedDate(key)}
+                  className={cn(
+                    "relative aspect-square flex flex-col items-center justify-center rounded-md text-xs transition-all",
+                    isSelected ? "bg-primary text-primary-foreground font-bold" :
+                    isToday ? "bg-accent/30 font-semibold" :
+                    "hover:bg-muted/50"
+                  )}
+                >
+                  {day}
+                  {count > 0 && (
+                    <span className={cn(
+                      "absolute bottom-0.5 text-[8px] font-bold leading-none",
+                      isSelected ? "text-primary-foreground/80" : "text-primary"
+                    )}>
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Daily activity */}
+        <div className="border-t border-border pt-3">
+          <h3 className="font-display text-lg text-primary">Активность за день</h3>
+          <p className="text-xs text-muted-foreground mb-1">{selDateStr}</p>
+          <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
+            <span>Задач: <strong className="text-foreground">{selectedTasks.length}</strong></span>
+            <span>Время: <strong className="text-foreground">{selectedTotalTime > 0 ? formatTime(selectedTotalTime) : "—"}</strong></span>
+          </div>
+
+          {/* Category breakdown */}
+          {selectedTasks.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {Array.from(new Set(selectedTasks.map((t) => t.category))).map((cat) => {
+                const catTasks = selectedTasks.filter((t) => t.category === cat);
+                const catTime = catTasks.reduce((s, t) => s + (t.timeSpent ?? 0), 0);
+                return (
+                  <span key={cat} className={cn("inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full", CAT_COLORS[cat].bg)}>
+                    <CategoryIcon category={cat} size={10} />
+                    {catTasks.length} · {catTime > 0 ? formatTime(catTime) : "—"}
+                  </span>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Timeline stickers */}
+          {selectedTasks.length > 0 ? (
+            <div className="relative pl-5 mb-4">
+              {/* Vertical line */}
+              <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-border" />
+
+              {selectedTasks.map((task, idx) => {
+                const completedAt = new Date(task.statusChangedAt);
+                const durationMin = Math.round((task.timeSpent ?? 0) / 60);
+                const startTime = task.timeSpent
+                  ? new Date(task.statusChangedAt - (task.timeSpent * 1000))
+                  : completedAt;
+                const catInfo = CATEGORIES[task.category];
+
+                return (
+                  <div key={task.id} className="relative mb-2.5 last:mb-0">
+                    {/* Dot on timeline */}
+                    <div className={cn(
+                      "absolute -left-3 top-2 w-2.5 h-2.5 rounded-full border-2 border-background",
+                      DOT_COLORS[task.category]
+                    )} />
+
+                    {/* Sticker */}
+                    <div className={cn(
+                      "rounded-lg p-2.5 border-l-3",
+                      CAT_COLORS[task.category].bg,
+                      CAT_COLORS[task.category].border
+                    )}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[10px] text-muted-foreground font-mono">
+                          {formatHHMM(startTime)}
+                        </span>
+                        {durationMin > 0 && (
+                          <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                            <Clock size={9} /> {durationMin}м
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs font-medium leading-snug mb-1.5">{task.text}</p>
+                      <div className="flex flex-wrap gap-1">
+                        <span className={cn(
+                          "text-[9px] px-1.5 py-0.5 rounded font-semibold",
+                          DOT_COLORS[task.category], "text-white"
+                        )}>
+                          {catInfo.name}
+                        </span>
+                        {task.subcategory && (
+                          <span className={cn(
+                            "text-[9px] px-1.5 py-0.5 rounded",
+                            CAT_COLORS[task.category].bg,
+                            "border border-current opacity-70"
+                          )}>
+                            {task.subcategory}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-center text-muted-foreground text-sm py-4">
+              Нет завершённых задач за этот день
+            </p>
+          )}
+        </div>
+
+        {/* Manual task entry */}
+        <div className="border-t border-border pt-3">
+          <h4 className="text-xs font-semibold text-muted-foreground mb-2">Добавить задачу вручную</h4>
+          <input
+            type="text"
+            value={manualText}
+            onChange={(e) => setManualText(e.target.value)}
+            placeholder="введите задачу, которую вы делали в этот день"
+            className="w-full rounded-lg border border-border bg-muted/30 px-3 py-2 text-sm placeholder:text-muted-foreground/60 mb-2"
+          />
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <select
+              value={manualCategory}
+              onChange={(e) => setManualCategory(Number(e.target.value) as CategoryId)}
+              className="rounded-md border border-border bg-muted/30 px-2 py-1.5 text-xs"
+            >
+              {([1, 2, 3, 4, 5] as CategoryId[]).map((c) => (
+                <option key={c} value={c}>{CATEGORIES[c].name}</option>
+              ))}
+            </select>
+            <div className="flex items-center gap-1">
+              <input
+                type="number"
+                min={1}
+                max={480}
+                value={manualDuration}
+                onChange={(e) => setManualDuration(Math.max(1, parseInt(e.target.value) || 1))}
+                className="w-14 rounded-md border border-border bg-muted/30 px-2 py-1.5 text-xs text-center"
+              />
+              <span className="text-[10px] text-muted-foreground">мин</span>
+            </div>
+            <div className="flex items-center gap-0.5">
+              <input
+                type="number"
+                min={0}
+                max={23}
+                value={manualHour}
+                onChange={(e) => setManualHour(Math.min(23, Math.max(0, parseInt(e.target.value) || 0)))}
+                className="w-10 rounded-md border border-border bg-muted/30 px-1 py-1.5 text-xs text-center"
+              />
+              <span className="text-[10px]">:</span>
+              <input
+                type="number"
+                min={0}
+                max={59}
+                value={manualMinute}
+                onChange={(e) => setManualMinute(Math.min(59, Math.max(0, parseInt(e.target.value) || 0)))}
+                className="w-10 rounded-md border border-border bg-muted/30 px-1 py-1.5 text-xs text-center"
+              />
+            </div>
+            <button
+              onClick={handleAddManual}
+              disabled={!manualText.trim()}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-medium disabled:opacity-40 active:scale-95 transition-all"
+            >
+              <Plus size={12} /> Добавить
+            </button>
+          </div>
+        </div>
+
+        <button
+          onClick={onClose}
+          className="w-full mt-3 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium active:scale-[0.98] transition-all"
+        >
+          Закрыть
+        </button>
+      </div>
+    </div>
+  );
+}
