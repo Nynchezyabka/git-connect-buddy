@@ -27,6 +27,10 @@
   --font-display: "Caveat", cursive;
   --font-body: "Montserrat", system-ui, sans-serif;
 
+  /* Timer text glow */
+  --timer-text-shadow: 0 0 10px rgba(255,255,255,0.8), 0 0 20px rgba(255,255,255,0.6), 0 0 30px rgba(255,255,255,0.4);
+  --timer-glow-color: rgba(255,255,255,0.9);
+
   /* Animations */
   --animate-fade-in: fade-in 0.3s ease-out;
   --animate-fade-out: fade-out 0.3s ease-out;
@@ -119,4 +123,19 @@ body:is(.dark *) {
 }
 .hover-scale:hover {
   transform: scale(1.03);
+}
+
+/* Display font weight - make cursive fonts bolder */
+.font-display {
+  font-weight: 700 !important;
+}
+
+/* Timer glow effect */
+.timer-glow {
+  text-shadow: var(--timer-text-shadow);
+}
+
+/* Timer label glow */
+.timer-label-glow {
+  text-shadow: 0 0 8px rgba(255,255,255,0.9), 0 0 15px rgba(255,255,255,0.7), 0 2px 4px rgba(0,0,0,0.3);
 }

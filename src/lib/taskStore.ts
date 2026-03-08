@@ -5,6 +5,29 @@ import { dbSaveTasks, dbLoadTasksOrdered, dbGetMeta, dbSetMeta, migrateFromLocal
 let cachedTasks: Task[] = [];
 let initialized = false;
 
+// Normalize old English subcategory names to Russian
+const SUBCATEGORY_MIGRATIONS: Record<string, string> = {
+  "WORK": "Работа",
+  "Work": "Работа",
+  "HOME": "Дом",
+  "Home": "Дом",
+  "HEALTH": "Здоровье",
+  "Health": "Здоровье",
+  "FINANCE": "Финансы",
+  "Finance": "Финансы",
+  "STUDY": "Учёба",
+  "Study": "Учёба",
+};
+
+function normalizeTasks(tasks: Task[]): Task[] {
+  return tasks.map(t => {
+    if (t.subcategory && SUBCATEGORY_MIGRATIONS[t.subcategory]) {
+      return { ...t, subcategory: SUBCATEGORY_MIGRATIONS[t.subcategory] };
+    }
+    return t;
+  });
+}
+
 export async function initTaskStore(): Promise<Task[]> {
   if (initialized) return cachedTasks;
 
@@ -12,13 +35,14 @@ export async function initTaskStore(): Promise<Task[]> {
   if (!localStorage.getItem("idb_migrated")) {
     const migrated = await migrateFromLocalStorage();
     if (migrated) {
-      cachedTasks = migrated;
+      cachedTasks = normalizeTasks(migrated);
       initialized = true;
       return cachedTasks;
     }
   }
 
-  cachedTasks = await dbLoadTasksOrdered();
+  const raw = await dbLoadTasksOrdered();
+  cachedTasks = normalizeTasks(raw);
   initialized = true;
   return cachedTasks;
 }
