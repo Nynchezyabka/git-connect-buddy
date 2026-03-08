@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Task, CategoryId, CATEGORIES, DEFAULT_SUBCATEGORIES } from "@/types";
 import { useApp } from "@/App";
-import { getCustomSubcategories } from "@/lib/taskStore";
+import { getCustomSubcategoriesSync } from "@/lib/taskStore";
 import { cn } from "@/lib/utils";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import {
