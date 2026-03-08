@@ -35,7 +35,7 @@ export default function App() {
   const [showTasks, setShowTasks] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
-  const [showTimeStats, setShowTimeStats] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const [timerTask, setTimerTask] = useState<Task | null>(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addModalCategory, setAddModalCategory] = useState<CategoryId>(0);
