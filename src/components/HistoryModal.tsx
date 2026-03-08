@@ -270,7 +270,7 @@ export function HistoryModal({ onClose }: Props) {
                         </span>
                         {task.subcategory && (
                           <span className={cn(
-                            "text-[9px] px-1.5 py-0.5 rounded",
+                            "text-[10px] px-1.5 py-0.5 rounded",
                             CAT_COLORS[task.category].bg,
                             "border border-current opacity-70"
                           )}>
