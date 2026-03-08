@@ -27,6 +27,10 @@
   --font-display: "Caveat", cursive;
   --font-body: "Montserrat", system-ui, sans-serif;
 
+  /* Timer text glow */
+  --timer-text-shadow: 0 0 10px rgba(255,255,255,0.8), 0 0 20px rgba(255,255,255,0.6), 0 0 30px rgba(255,255,255,0.4);
+  --timer-glow-color: rgba(255,255,255,0.9);
+
   /* Animations */
   --animate-fade-in: fade-in 0.3s ease-out;
   --animate-fade-out: fade-out 0.3s ease-out;
