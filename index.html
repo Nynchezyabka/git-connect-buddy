@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🎁 КОРОБОЧКА 4.6</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap&subset=cyrillic,cyrillic-ext" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap&subset=cyrillic,cyrillic-ext" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+	<meta name="theme-color" content="#5d4037">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="default">
+	<meta name="apple-mobile-web-app-title" content="КОРОБОЧКА">
+	<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiBmaWxsPSIjZmZmYWYwIi8+CjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQ1LCA0NSkiPgo8cmVjdCB4PSIwIiB5PSI0OCIgd2lkdGg9IjkwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjRkZENTRGIiBzdHJva2U9IiM1ZDQwMzciIHN0cm9rZS13aWR0aD0iMiIgcng9IjgiLz4KPHBhdGggZD0iTTAgNDhMMjIgMzJMNDUgNDhMMjIgNDgiIGZpbGw9IiNGRkE3MjciIHN0cm9rZT0iIzVkNDAzNyIgc3Ryb2tlLXdpZHRoPSIyIi8+CjxwYXRoIGQ9Ik00NSA0OEw2OCAzMkw5MCA0OEw2OCA0OCIgZmlsbD0iI0ZGQjc0RiIgc3Ryb2tlPSIjNWQ0MDM3IiBzdHJva2Utd2lkdGg9IjIiLz4KPC9nPgo8L3N2Zz4=" sizes="180x180">
+	<link rel="manifest" href="/manifest.json">
+	<script>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <button class="app-info-button header-icon-button" id="infoFab" aria-label="О приложении">i</button>
+            <h1>🎁 КОРОБОЧКА 4.6</h1>
+            <button class="notify-toggle header-icon-button" id="notifyToggleBtn" aria-label="Уведомления">
+                <i class="fas fa-bell-slash"></i>
+            </button>
+        </header>
+
+        <div class="dashboard-layout">
+            <aside class="random-column">
+                <div class="sections">
+                    <div class="section mandatory" data-category="1">
+                        <h2>Обязательные дела</h2>
+                        <div class="section-actions">
+                            <button class="section-action-btn section-random-btn" aria-label="Случайная задача">
+                                <i class="fas fa-dice"></i>
+                                <span class="action-text">случайная задача</span>
+                            </button>
+                            <button class="section-action-btn section-add-btn" aria-label="Добавить задачу">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="section security" data-category="2,5">
+                        <h2>Система безопасности <br>и доступность простых радостей</h2>
+                        <div class="section-actions">
+                            <button class="section-action-btn section-random-btn" aria-label="Случайная задача">
+                                <i class="fas fa-dice"></i>
+                                <span class="action-text">случайная задача</span>
+                            </button>
+                            <button class="section-action-btn section-add-btn" aria-label="Добавить задачу">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="section joys" data-category="3,4">
+                        <h2>Простые и эго-радости</h2>
+                        <div class="section-actions">
+                            <button class="section-action-btn section-random-btn" aria-label="Случайная задача">
+                                <i class="fas fa-dice"></i>
+                                <span class="action-text">случайная задача</span>
+                            </button>
+                            <button class="section-action-btn section-add-btn" aria-label="Добавить задачу">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <div class="task-column">
+                <div class="controls">
+                    <button id="showTasksBtn">Все задачи</button>
+                    <button id="archiveBtn">История</button>
+                    <button id="addMultipleBtn">Добавить несколько задач</button>
+                    <button id="exportTasksBtn">Скачать задачи</button>
+                </div>
+
+                <div class="task-list" id="taskList" style="display: none;">
+                    <h2>Все задачи</h2>
+
+                    <div class="task-form">
+                        <textarea id="taskText" placeholder="Введите новую задачу или несколько (каждая с новой строки)..."></textarea>
+                        <select id="taskCategory">
+                            <option value="0">Категория не определена (неактивна)</option>
+                            <option value="1">Обязательные дела</option>
+                            <option value="2">Система безопасности</option>
+                            <option value="5">Доступность простых радостей</option>
+                            <option value="3">Простые радости</option>
+                            <option value="4">Эго-радости</option>
+                        </select>
+                        <button id="addTaskBtn">Добавить задачу</button>
+                    </div>
+
+                    <div class="import-export">
+                        <label for="importFile" class="file-label">
+                            <i class="fas fa-upload"></i> Загрузить задачи из файла
+                        </label>
+                        <input type="file" id="importFile" class="file-input" accept=".json">
+                        <button id="pasteTasksBtn" class="file-label" type="button">
+                            <i class="fas fa-clipboard"></i> Вставить список задач
+                        </button>
+                    </div>
+
+                    <div class="tasks" id="tasksContainer">
+                        <!-- Задачи будут добавляться здесь -->
+                    </div>
+
+                    <button id="hideTasksBtn">Скрыть список</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="timer-screen" id="timerScreen">
+        <div class="timer-content">
+            <h2>Ваша задача:</h2>
+            <div class="timer-task" id="timerTaskText"></div>
+            <div class="timer-category-info" id="timerCategoryInfo"></div>
+            <div class="timer-display" id="timerDisplay">
+                <span class="timer-digit" data-digit="0">1</span><span class="timer-digit" data-digit="1">5</span><span class="timer-separator">:</span><span class="timer-digit" data-digit="2">0</span><span class="timer-digit" data-digit="3">0</span>
+            </div>
+            
+            <div class="timer-controls">
+                <div class="timer-settings-row">
+                    <input type="number" id="timerMinutes" min="1" max="120" value="15">
+                    <button class="timer-btn" id="soundToggleBtn" aria-pressed="true" aria-label="Звук включён" title="Звук включён"><i class="fas fa-volume-up"></i></button>
+                </div>
+                <div class="timer-action-row">
+                    <button class="timer-btn" id="startTimerBtn">Старт</button>
+                    <button class="timer-btn" id="pauseTimerBtn">Пауза</button>
+                    <button class="timer-btn" id="resetTimerBtn">Сброс</button>
+                </div>
+            </div>
+
+            <div class="timer-primary-actions">
+                <button class="timer-btn" id="completeNowBtn"><i class="fas fa-check"></i> Готово</button>
+            </div>
+
+            <div class="timer-complete-options" id="timerCompleteOptions">
+                <button class="timer-btn" id="completeTaskBtn">Завершить задачу</button>
+                <button class="timer-btn" id="returnTaskBtn">Вернуть в коробочку</button>
+            </div>
+
+            <div class="timer-quick-add" id="timerQuickAdd">
+                <button class="timer-btn timer-quick-add-btn" id="quickAddTaskBtn" type="button" aria-label="Добавить новую задачу">
+                    <i class="fas fa-plus"></i>
+                    <span class="timer-quick-add-text">Добавить новую задачу</span>
+                </button>
+            </div>
+
+            <button class="timer-btn timer-close-action" id="closeTimerBtn">Закрыть</button>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        Время вышло!
+    </div>
+
+    <!-- Add Task Modal -->
+    <div class="modal" id="addTaskModal" aria-hidden="true" role="dialog">
+        <div class="modal-backdrop" id="modalBackdrop"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="modalCloseBtn" aria-label="Закрыть">&times;</button>
+            <h3>Добавить задачу</h3>
+            <textarea id="modalTaskText" placeholder="Введите новую задачу или несколько (каждая с новой строки)..."></textarea>
+            <div id="modalCategoryOptions" class="modal-category-options" aria-label="Выбор категории"></div>
+            <div class="add-subcategory-controls" id="modalSubcategories" style="display:none;"></div>
+            <div class="modal-actions">
+                <button id="modalAddTaskBtn">Добавить</button>
+                <button id="modalCancelBtn">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm / Info Modal -->
+    <div class="modal" id="confirmModal" aria-hidden="true" role="dialog">
+        <div class="modal-backdrop" id="confirmBackdrop"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="confirmCloseBtn" aria-label="Закрыть">&times;</button>
+            <h3 id="confirmTitle">Подтверждение</h3>
+            <div class="modal-message" id="confirmMessage"></div>
+            <label class="modal-check" id="confirmCheckWrap" style="display:none;"><input type="checkbox" id="confirmCheckbox"> <span id="confirmCheckboxLabel">Подтверждаю действие</span></label>
+            <div class="modal-actions">
+                <button id="confirmOkBtn">Подтвердить</button>
+                <button id="confirmCancelBtn">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subcategory Actions Modal -->
+    <div class="modal" id="subcatActionsModal" aria-hidden="true" role="dialog">
+        <div class="modal-backdrop" id="subcatActionsBackdrop"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="subcatActionsClose" aria-label="Закрыть">&times;</button>
+            <h3>Действия с подкатегорией</h3>
+            <div class="subcat-actions">
+                <button type="button" class="subcat-action-btn" data-action="rename">Переименовать</button>
+                <button type="button" class="subcat-action-btn" data-action="move">Перенести задачи</button>
+                <button type="button" class="subcat-action-btn destructive" data-action="delete">Удалить подкатегорию</button>
+            </div>
+            <div class="modal-actions">
+                <button id="subcatActionsCancel">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rename Subcategory Modal -->
+    <div class="modal" id="renameSubcatModal" aria-hidden="true" role="dialog">
+        <div class="modal-backdrop" id="renameSubcatBackdrop"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="renameSubcatClose" aria-label="Закрыть">&times;</button>
+            <h3>Переименовать подкатегорию</h3>
+            <label for="renameSubcatInput" class="modal-label">Новое название</label>
+            <input type="text" id="renameSubcatInput">
+            <div class="modal-actions">
+                <button id="renameSubcatOk">Сохранить</button>
+                <button id="renameSubcatCancel">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Move Task Modal -->
+    <div class="modal" id="moveTaskModal" aria-hidden="true" role="dialog">
+        <div class="modal-backdrop" id="moveTaskBackdrop"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="moveTaskClose" aria-label="Закрыть">&times;</button>
+            <h3>Выбрать категорию и подкатегорию</h3>
+            <div id="moveCategoryOptions" class="modal-category-options" aria-label="Выбор категории"></div>
+            <div class="add-subcategory-controls" id="moveSubcategories" style="display:none;"></div>
+            <div class="modal-actions">
+                <button id="moveTaskOk" class="modal-btn">Перенести</button>
+                <button id="moveTaskCancel" class="modal-btn">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Move Subcategory Tasks Modal -->
+    <div class="modal" id="moveTasksModal" aria-hidden="true" role="dialog">
+        <div class="modal-backdrop" id="moveTasksBackdrop"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="moveTasksClose" aria-label="Закрыть">&times;</button>
+            <h3>Выбрать новую категорию и подкатегорию</h3>
+            <div id="moveTasksCategoryOptions" class="modal-category-options" aria-label="Выбор категории"></div>
+            <div class="add-subcategory-controls" id="moveTasksSubcategories" style="display:none;"></div>
+            <div class="modal-actions">
+                <button id="moveTasksOk" class="modal-btn">Перенести задачи</button>
+                <button id="moveTasksCancel" class="modal-btn">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paste Tasks Modal -->
+    <div class="modal" id="pasteTasksModal" aria-hidden="true" role="dialog">
+        <div class="modal-backdrop" id="pasteTasksBackdrop"></div>
+        <div class="modal-content paste-modal-content">
+            <button class="modal-close" id="pasteTasksCloseBtn" aria-label="Закрыть">&times;</button>
+            <h3>Вставить список задач</h3>
+            <div class="paste-modal-body">
+                <label for="pasteTasksInput" class="modal-label">Каждая задача с новой строки</label>
+                <textarea id="pasteTasksInput" class="paste-modal-textarea" placeholder="Вставьте задачи..." aria-label="Список задач построчно"></textarea>
+                <div class="modal-note">Задачи будут добавлены в категорию «Категория не определена». Позже их можно распределить.</div>
+            </div>
+            <div class="modal-actions">
+                <button id="pasteTasksAddBtn">Добавить</button>
+                <button id="pasteTasksCancelBtn" type="button">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Past Task Category Modal -->
+    <div class="modal" id="pastTaskCategoryModal" aria-hidden="true" role="dialog">
+        <div class="modal-backdrop" id="pastTaskCategoryBackdrop"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="pastTaskCategoryClose" aria-label="Закрыть">&times;</button>
+            <h3>Выбрать категорию</h3>
+            <div id="pastTaskCategoryOptions" class="modal-category-options" aria-label="Выбор категории"></div>
+            <div class="add-subcategory-controls" id="pastTaskSubcategories" style="display:none;"></div>
+        </div>
+    </div>
+
+    <!-- Task Actions Menu Modal (for completed tasks) -->
+    <div class="modal" id="taskActionsModal" aria-hidden="true" role="dialog">
+        <div class="modal-backdrop" id="taskActionsBackdrop"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="taskActionsClose" aria-label="Закрыть">&times;</button>
+            <h3>Действия с задачей</h3>
+            <div class="task-actions-list">
+                <button type="button" class="task-action-btn" data-action="edit">Изменить</button>
+                <button type="button" class="task-action-btn destructive" data-action="delete">Удалить</button>
+            </div>
+            <div class="modal-actions">
+                <button id="taskActionsCancel">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Task Modal -->
+    <div class="modal" id="editTaskModal" aria-hidden="true" role="dialog">
+        <div class="modal-backdrop" id="editTaskBackdrop"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="editTaskClose" aria-label="Закрыть">&times;</button>
+            <h3>Изменить задачу</h3>
+            <div class="edit-task-container">
+                <div class="edit-task-section">
+                    <label for="editTaskNameInput" class="modal-label">Название задачи</label>
+                    <textarea id="editTaskNameInput" placeholder="Введите название задачи"></textarea>
+                </div>
+                <div class="edit-task-section">
+                    <label class="modal-label">Категория</label>
+                    <div id="editTaskCategoryOptions" class="modal-category-options" aria-label="Выбор категории"></div>
+                    <div class="add-subcategory-controls" id="editTaskSubcategories" style="display:none;"></div>
+                </div>
+                <div class="edit-task-section">
+                    <label class="modal-label">Время завершения</label>
+                    <div class="edit-task-time-controls">
+                        <div class="time-group">
+                            <label for="editTaskHours">Час:</label>
+                            <input type="number" id="editTaskHours" min="0" max="23" class="time-input">
+                        </div>
+                        <div class="time-group">
+                            <label for="editTaskMinutes">Минуты:</label>
+                            <input type="number" id="editTaskMinutes" min="0" max="59" class="time-input">
+                        </div>
+                    </div>
+                    <div class="edit-task-duration">
+                        <label for="editTaskDuration">Продолжительность (минуты):</label>
+                        <input type="number" id="editTaskDuration" min="0" max="480" placeholder="0">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button id="editTaskOk">Сохранить</button>
+                <button id="editTaskCancel">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Activity Calendar Modal -->
+    <div class="modal" id="dailyActivityModal" aria-hidden="true" role="dialog">
+        <div class="modal-backdrop" id="dailyActivityBackdrop"></div>
+        <div class="modal-content daily-activity-modal">
+            <button class="modal-close" id="dailyActivityCloseBtn" aria-label="Закрыть">&times;</button>
+            <div class="daily-activity-container">
+                <div class="calendar-section">
+                    <h3>Календарь</h3>
+                    <div id="calendarWidget" class="calendar-widget"></div>
+                </div>
+                <div class="daily-view-section">
+                    <h3>Активность за день</h3>
+                    <div id="selectedDateDisplay" class="selected-date-display"></div>
+
+                    <!-- История фильтры и статистика -->
+                    <div id="historyFiltersContainer" class="timeline-filters"></div>
+                    <div id="historyStatsContainer" class="timeline-stats"></div>
+
+                    <div id="dailyTasksList" class="daily-tasks-list"></div>
+                    <div class="add-past-task-controls" id="addPastTaskControls">
+                        <textarea id="pastTaskInput" placeholder="Введите задачу, которую вы делали этот день..." class="past-task-textarea"></textarea>
+                        <div class="past-task-controls-row">
+                            <button id="pastTaskCategoryBtn" class="past-task-category-btn">Выбрать категорию</button>
+                            <input type="number" id="pastTaskDuration" placeholder="Минуты" min="1" max="480" class="past-task-duration">
+                        </div>
+                        <div class="past-task-time-row">
+                            <div class="past-task-time-group">
+                                <label for="pastTaskHours">Час:</label>
+                                <input type="number" id="pastTaskHours" min="0" max="23" class="past-task-time-input">
+                            </div>
+                            <div class="past-task-time-group">
+                                <label for="pastTaskMinutes">Минуты:</label>
+                                <input type="number" id="pastTaskMinutes" min="0" max="59" class="past-task-time-input">
+                            </div>
+                        </div>
+                        <button id="addPastTaskBtn" class="add-past-task-btn">Добавить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Info Modal -->
+    <div class="modal" id="infoModal" aria-hidden="true" role="dialog">
+        <div class="modal-backdrop" id="infoBackdrop"></div>
+        <div class="modal-content info-modal-content">
+            <button class="modal-close" id="infoCloseBtn" aria-label="Закрыть">&times;</button>
+            <h2>🎁 О КОРОБОЧКЕ</h2>
+
+            <div class="info-section">
+                <h3>📖 История и цель создания</h3>
+                <p><strong>КОРОБОЧКА</strong> создана по мотивам методики психолога <a href="https://youtube.com/@violettamakeeva?si=q4H_89OUukUyGv3t" target="_blank" title="Перейти на YouTube-канал">Виолетты Макеевой</a> как инструмент мотивационной гигиены. Я делала её для себя с целью оптимизировать процесс и не быть привязанной к физической коробочке. Это был мой первый опыт создания приложений и мне очень помог ИИ, прототип написал DeepSeek, а дальше я продолжила с помощью builder.io. Хоть изначально это и было прокрастинацией, чтобы не приступать непосредственно к делу, но в итоге приложение очень помогает мне и стало любимым хобби</p>
+                <div class="psychology-points">
+                    <p>🛡️ <strong>Даёт шанс задачам с низкой мотивацией</strong> — безопасность, рутины, несрочные дела получают возможность быть выполненными</p>
+                    <p>🎯 <strong>Создаёт пространство для радостей</strong> — искусственно "внедряет" простые и эго-радости в ежедневную практику</p>
+                    <p>⏱️ <strong>Балансирует крайности</strong> — таймер предотвращает как начальное сопротивление, так и "увязание" в задаче</p>
+                    <p>💡 <strong>Диагностический инструмент</strong> — протест против своих же задач показывает области для психологической проработки</p>
+                </div>
+                <p class="philosophy"><em>Философия:</em> Это инструмент "лайтовой" самодисциплины, где вы сами определяете содержание и можете сделать паузу в любой момент.</p>
+            </div>
+
+            <div class="info-section">
+                <h3>⚡ Возможности приложения</h3>
+
+                <h4>🗂️ Система категорий</h4>
+                <ul class="categories-list">
+                    <li>🟨 <strong>Обязательные дела</strong> — срочные и важные задачи</li>
+                    <li>🟦 <strong>Система безопасности и доступность простых радостей</strong> — забота о базовых потребностях и условиях</li>
+                    <li>🟩 <strong>Простые радости</strong> — приятные мелочи</li>
+                    <li>🟥 <strong>Эго-радости</strong> — дела, связанные с социальными ожиданиями, статусом или внешним признанием.
+						<em>
+            После психологической проработки мы учимся отличать настоящие потребности от навязанных и можем осознанно выбирать, какие из этих задач действительно приносят нам радость, а не просто обслуживают чужие ожидания.
+       	</em>
+					</li>
+                </ul>
+
+                <h4>🔧 Ключевые функции</h4>
+                <ul class="features-list">
+                    <li>✅ <strong>Случайный выбор задач</strong> — как вытягивание бумажки из коробочки вслепую</li>
+                    <li>⏱️ <strong>Таймер для фокусировки</strong> — настраиваемое время работы без отвлечений</li>
+                    <li>📝 <strong>Гибкое управление</strong> — добавляйте, перемещайте, временно скрывайте задачи</li>
+                    <li>💾 <strong>Автономная работа</strong> — всё сохраняется на вашем устройстве, работает без интернета</li>
+                    <li>📱 <strong>Установка на устройство</strong> — Работает как полноценное приложение</li>
+                    <li>📤 <strong>Резервное копирование</strong> — сохраняйте задачи в файл и загружайте обратно</li>
+                </ul>
+
+                <h4>🔄 Как пользоваться</h4>
+                <ol class="usage-steps">
+                    <li><strong>Добавьте задачи</strong> в общий список</li>
+                    <li><strong>Распределите по категориям</strong> — как бумажки по отделениям коробочки</li>
+                    <li><strong>Выберите категорию</strong> — получите случайную задачу</li>
+                    <li><strong>Работайте по таймеру</strong> — сфокусируйтесь на выполнении</li>
+                    <li><strong>Отметьте результат:</strong>
+                        <ul>
+                            <li>✅ <strong>Завершить</strong> — задача становится неактивной</li>
+                            <li>🔄 <strong>Вернуть</strong> — задача остаётся в категории для повторного выбора</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="footer-note">
+                <p><em>Приложение не требует регистрации, полностью бесплатно и конфиденциально. Все данные хранятся только на вашем устройстве.</em></p>
+            </div>
+            <div class="modal-actions info-modal-actions">
+                <button id="infoCloseAction">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="db.js"></script>
+    <script src="script.js"></script>
+	</body>
+</html>
