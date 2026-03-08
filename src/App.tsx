@@ -15,7 +15,7 @@ import { OnboardingScreen } from "@/components/OnboardingScreen";
 import { OnboardingScreen } from "@/components/OnboardingScreen";
 import { processRecurringTemplates } from "@/lib/recurring";
 import { toast } from "sonner";
-import { Repeat, BarChart3 } from "lucide-react";
+import { Repeat } from "lucide-react";
 
 interface AppContextValue {
   tasks: Task[];
