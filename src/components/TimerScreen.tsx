@@ -1,0 +1,229 @@
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Task, CATEGORIES } from "@/types";
+import { useApp } from "@/App";
+import { getRandomBackgroundForCategory } from "@/lib/assets";
+import { X, Play, Pause, RotateCcw, Check, Undo2, Volume2, VolumeX } from "lucide-react";
+
+interface Props {
+  task: Task;
+  onClose: () => void;
+}
+
+export function TimerScreen({ task, onClose }: Props) {
+  const { setTasks } = useApp();
+  const [minutes, setMinutes] = useState(15);
+  const [timeLeft, setTimeLeft] = useState(15 * 60);
+  const [running, setRunning] = useState(false);
+  const [finished, setFinished] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const endAtRef = useRef(0);
+  const intervalRef = useRef<number | null>(null);
+  const bgImage = useRef(getRandomBackgroundForCategory(task.category));
+
+  const updateDisplay = useCallback(() => {
+    if (endAtRef.current <= 0) return;
+    const remaining = Math.max(0, Math.ceil((endAtRef.current - Date.now()) / 1000));
+    setTimeLeft(remaining);
+    if (remaining <= 0) {
+      clearInterval(intervalRef.current!);
+      setRunning(false);
+      setFinished(true);
+      if (soundEnabled) playWindChime();
+    }
+  }, [soundEnabled]);
+
+  useEffect(() => {
+    if (running) {
+      intervalRef.current = window.setInterval(updateDisplay, 250);
+      return () => clearInterval(intervalRef.current!);
+    }
+  }, [running, updateDisplay]);
+
+  const start = () => {
+    if (running) return;
+    if (finished) return;
+    const total = timeLeft > 0 ? timeLeft : minutes * 60;
+    endAtRef.current = Date.now() + total * 1000;
+    setRunning(true);
+  };
+
+  const pause = () => {
+    if (!running) return;
+    clearInterval(intervalRef.current!);
+    const remaining = Math.max(0, Math.ceil((endAtRef.current - Date.now()) / 1000));
+    setTimeLeft(remaining);
+    endAtRef.current = 0;
+    setRunning(false);
+  };
+
+  const reset = () => {
+    clearInterval(intervalRef.current!);
+    setRunning(false);
+    setFinished(false);
+    endAtRef.current = 0;
+    setTimeLeft(minutes * 60);
+  };
+
+  const completeTask = () => {
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === task.id ? { ...t, completed: true, statusChangedAt: Date.now() } : t
+      )
+    );
+    onClose();
+  };
+
+  const returnTask = () => {
+    onClose();
+  };
+
+  const mins = Math.floor(timeLeft / 60);
+  const secs = timeLeft % 60;
+  const info = CATEGORIES[task.category];
+
+  return (
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/40">
+      <div
+        className="relative w-full h-full flex flex-col items-center justify-center p-6 text-foreground overflow-auto"
+        style={{
+          backgroundColor: info.bgColor,
+          backgroundImage: bgImage.current
+            ? `linear-gradient(to bottom, rgba(255,255,255,0.3), rgba(255,255,255,0.2)), url('${bgImage.current}')`
+            : undefined,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 rounded-full bg-white/60 active:bg-white/80"
+        >
+          <X size={20} />
+        </button>
+
+        <h2 className="font-display text-2xl mb-2">Ваша задача:</h2>
+        <div
+          className="text-lg font-semibold text-center px-4 py-2 rounded-lg mb-2 max-w-md"
+          style={{ backgroundColor: info.bgColor }}
+        >
+          {task.text}
+        </div>
+        <div className="text-sm mb-6 opacity-80">{info.name}</div>
+
+        {/* Timer display */}
+        <div className="font-mono text-7xl font-bold mb-6 tracking-wider">
+          {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}
+        </div>
+
+        {!finished && (
+          <>
+            {/* Minutes input */}
+            <div className="flex items-center gap-2 mb-4">
+              <input
+                type="number"
+                min={1}
+                max={120}
+                value={minutes}
+                onChange={(e) => {
+                  const v = Math.max(1, parseInt(e.target.value) || 1);
+                  setMinutes(v);
+                  if (!running) setTimeLeft(v * 60);
+                }}
+                className="w-16 text-center rounded-md border border-border p-1.5 text-sm"
+                disabled={running}
+              />
+              <span className="text-sm">мин</span>
+              <button
+                onClick={() => setSoundEnabled(!soundEnabled)}
+                className="ml-3 p-2 rounded-md bg-white/50 active:bg-white/70"
+              >
+                {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+              </button>
+            </div>
+
+            {/* Timer controls */}
+            <div className="flex gap-3 mb-6">
+              <button
+                onClick={start}
+                className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium active:scale-95 transition-all"
+              >
+                <Play size={16} /> Старт
+              </button>
+              <button
+                onClick={pause}
+                className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-white/60 font-medium active:scale-95 transition-all"
+              >
+                <Pause size={16} /> Пауза
+              </button>
+              <button
+                onClick={reset}
+                className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-white/60 font-medium active:scale-95 transition-all"
+              >
+                <RotateCcw size={16} /> Сброс
+              </button>
+            </div>
+
+            {/* Complete now button */}
+            <button
+              onClick={completeTask}
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-green-600 text-white font-medium active:scale-95 transition-all"
+            >
+              <Check size={18} /> Готово
+            </button>
+          </>
+        )}
+
+        {finished && (
+          <div className="flex flex-col gap-3">
+            <p className="text-center text-lg font-semibold mb-2">Время вышло!</p>
+            <button
+              onClick={completeTask}
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-green-600 text-white font-medium active:scale-95 transition-all"
+            >
+              <Check size={18} /> Завершить задачу
+            </button>
+            <button
+              onClick={returnTask}
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-white/60 font-medium active:scale-95 transition-all"
+            >
+              <Undo2 size={18} /> Вернуть в коробочку
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function playWindChime() {
+  try {
+    const AudioCtor = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioCtor) return;
+    const ctx = new AudioCtor();
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0.001, ctx.currentTime);
+    master.gain.exponentialRampToValueAtTime(0.5, ctx.currentTime + 0.1);
+    master.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 3.0);
+    master.connect(ctx.destination);
+    const tones = [
+      { f: 659, s: 0, l: 1.5, v: 0.3 },
+      { f: 784, s: 0.1, l: 1.3, v: 0.25 },
+      { f: 880, s: 0.2, l: 1.1, v: 0.2 },
+      { f: 1047, s: 0.3, l: 0.9, v: 0.15 },
+      { f: 1175, s: 0.4, l: 0.7, v: 0.1 },
+    ];
+    tones.forEach(({ f, s, l, v }) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(f, ctx.currentTime + s);
+      gain.gain.setValueAtTime(0.001, ctx.currentTime + s);
+      gain.gain.exponentialRampToValueAtTime(v, ctx.currentTime + s + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + s + l);
+      osc.connect(gain).connect(master);
+      osc.start(ctx.currentTime + s);
+      osc.stop(ctx.currentTime + s + l + 0.1);
+    });
+    setTimeout(() => ctx.close(), 3500);
+  } catch {}
+}

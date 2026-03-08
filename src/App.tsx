@@ -1,0 +1,173 @@
+import { useState, useCallback, useRef, createContext, useContext } from "react";
+import { Task, CategoryId, CATEGORIES, SECTIONS } from "@/types";
+import { loadTasks, saveTasks, getNextId, exportTasksToFile, importTasksFromFile } from "@/lib/taskStore";
+import { Dashboard } from "@/components/Dashboard";
+import { TaskListPanel } from "@/components/TaskListPanel";
+import { TimerScreen } from "@/components/TimerScreen";
+import { AddTaskModal } from "@/components/AddTaskModal";
+import { toast } from "sonner";
+
+interface AppContextValue {
+  tasks: Task[];
+  setTasks: (fn: (prev: Task[]) => Task[]) => void;
+  openTimer: (task: Task) => void;
+  openAddModal: (category?: CategoryId, restrictCategories?: CategoryId[]) => void;
+}
+
+export const AppContext = createContext<AppContextValue>(null!);
+export const useApp = () => useContext(AppContext);
+
+export default function App() {
+  const [tasks, setTasksRaw] = useState<Task[]>(() => loadTasks());
+  const [showTasks, setShowTasks] = useState(false);
+  const [showArchive, setShowArchive] = useState(false);
+  const [timerTask, setTimerTask] = useState<Task | null>(null);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [addModalCategory, setAddModalCategory] = useState<CategoryId>(0);
+  const [addModalRestrict, setAddModalRestrict] = useState<CategoryId[] | null>(null);
+
+  const setTasks = useCallback((fn: (prev: Task[]) => Task[]) => {
+    setTasksRaw((prev) => {
+      const next = fn(prev);
+      saveTasks(next);
+      return next;
+    });
+  }, []);
+
+  const openTimer = useCallback((task: Task) => {
+    setTimerTask(task);
+  }, []);
+
+  const openAddModal = useCallback((category?: CategoryId, restrictCategories?: CategoryId[]) => {
+    setAddModalCategory(category ?? 0);
+    setAddModalRestrict(restrictCategories ?? null);
+    setAddModalOpen(true);
+  }, []);
+
+  const handleAddTask = useCallback((text: string, category: CategoryId, subcategory?: string) => {
+    const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+    if (lines.length === 0) return;
+    setTasks((prev) => {
+      let nextId = getNextId(prev);
+      const newTasks = lines.map((line) => {
+        const t: Task = {
+          id: nextId++,
+          text: line,
+          category,
+          completed: false,
+          active: true,
+          statusChangedAt: Date.now(),
+        };
+        if (subcategory) t.subcategory = subcategory;
+        return t;
+      });
+      return [...prev, ...newTasks];
+    });
+    toast.success(`Добавлено ${lines.length} задач(и)`);
+  }, [setTasks]);
+
+  const handleRandomTask = useCallback((categories: CategoryId[]) => {
+    const active = tasks.filter(
+      (t) => categories.includes(t.category) && t.active && !t.completed
+    );
+    if (active.length === 0) {
+      toast.info("Нет активных задач в этой категории!");
+      return;
+    }
+    const task = active[Math.floor(Math.random() * active.length)];
+    openTimer(task);
+  }, [tasks, openTimer]);
+
+  const handleExport = useCallback(() => {
+    exportTasksToFile(tasks);
+    toast.success("Задачи экспортированы");
+  }, [tasks]);
+
+  const handleImport = useCallback(async (file: File) => {
+    try {
+      const imported = await importTasksFromFile(file);
+      setTasks(() => imported);
+      toast.success(`Импортировано ${imported.length} задач`);
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  }, [setTasks]);
+
+  const ctx: AppContextValue = { tasks, setTasks, openTimer, openAddModal };
+
+  return (
+    <AppContext.Provider value={ctx}>
+      <div className="max-w-4xl mx-auto p-2.5">
+        {/* Header */}
+        <header className="text-center mb-4 pt-1 relative">
+          <h1 className="font-display text-4xl text-primary drop-shadow-sm">
+            🎁 КОРОБОЧКА 5.0
+          </h1>
+        </header>
+
+        {/* Dashboard sections */}
+        <Dashboard onRandomTask={handleRandomTask} />
+
+        {/* Controls */}
+        <div className="flex flex-col gap-2.5 my-5">
+          <button
+            onClick={() => { setShowArchive(false); setShowTasks(true); }}
+            className="w-full py-3 px-4 rounded-lg bg-primary text-primary-foreground font-medium shadow-sm active:scale-[0.98] transition-all"
+          >
+            Все задачи
+          </button>
+          <div className="grid grid-cols-2 gap-2.5">
+            <button
+              onClick={() => { setShowArchive(true); setShowTasks(true); }}
+              className="py-3 px-4 rounded-lg bg-primary text-primary-foreground font-medium shadow-sm active:scale-[0.98] transition-all"
+            >
+              История
+            </button>
+            <button
+              onClick={handleExport}
+              className="py-3 px-4 rounded-lg bg-primary text-primary-foreground font-medium shadow-sm active:scale-[0.98] transition-all"
+            >
+              Скачать задачи
+            </button>
+          </div>
+          <label className="w-full py-3 px-4 rounded-lg bg-muted text-muted-foreground font-medium text-center cursor-pointer shadow-sm active:scale-[0.98] transition-all">
+            📂 Загрузить из файла
+            <input
+              type="file"
+              accept=".json"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleImport(f);
+                e.target.value = "";
+              }}
+            />
+          </label>
+        </div>
+
+        {/* Task list panel */}
+        {showTasks && (
+          <TaskListPanel
+            showArchive={showArchive}
+            onClose={() => setShowTasks(false)}
+          />
+        )}
+
+        {/* Timer */}
+        {timerTask && (
+          <TimerScreen task={timerTask} onClose={() => setTimerTask(null)} />
+        )}
+
+        {/* Add modal */}
+        {addModalOpen && (
+          <AddTaskModal
+            defaultCategory={addModalCategory}
+            restrictCategories={addModalRestrict}
+            onAdd={handleAddTask}
+            onClose={() => setAddModalOpen(false)}
+          />
+        )}
+      </div>
+    </AppContext.Provider>
+  );
+}
