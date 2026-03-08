@@ -109,6 +109,25 @@ export function TaskListPanel({ showArchive, onClose }: Props) {
     setDragOverId(null);
   }, [dragId, setTasks]);
 
+  const toggleCat = (cat: CategoryId) => {
+    setCollapsedCats(prev => {
+      const next = new Set(prev);
+      if (next.has(cat)) next.delete(cat);
+      else next.add(cat);
+      return next;
+    });
+  };
+
+  const toggleSub = (cat: CategoryId, sub: string) => {
+    const key = `${cat}-${sub}`;
+    setCollapsedSubs(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
   return (
     <div className="bg-background rounded-lg p-4 shadow-md mb-5 animate-fade-in border border-border">
       <div className="flex items-center justify-between mb-3">
