@@ -10,5 +10,10 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react-swc": "^4.2.3"
+  }
 }
