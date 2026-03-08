@@ -213,8 +213,8 @@ export function HistoryModal({ onClose }: Props) {
                 const catTasks = selectedTasks.filter((t) => t.category === cat);
                 const catTime = catTasks.reduce((s, t) => s + (t.timeSpent ?? 0), 0);
                 return (
-                  <span key={cat} className={cn("inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full", CAT_COLORS[cat].bg)}>
-                    <CategoryIcon category={cat} size={10} />
+                  <span key={cat} className={cn("inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full", CAT_COLORS[cat].bg)}>
+                    <CategoryIcon category={cat} size={12} />
                     {catTasks.length} · {catTime > 0 ? formatTime(catTime) : "—"}
                   </span>
                 );
