@@ -246,7 +246,7 @@ export function HistoryModal({ onClose }: Props) {
 
                     {/* Sticker */}
                     <div className={cn(
-                      "rounded-lg p-2.5 border-l-3",
+                      "rounded-lg p-3 border-l-4",
                       CAT_COLORS[task.category].bg,
                       CAT_COLORS[task.category].border
                     )}>
