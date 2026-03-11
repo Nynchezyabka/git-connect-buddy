@@ -198,7 +198,7 @@ export default function App() {
           <div className="grid grid-cols-2 gap-2.5">
             <button
               onClick={() => { setShowHistory(true); setShowTasks(false); setShowTemplates(false); }}
-              className="py-3 px-4 rounded-lg bg-primary text-primary-foreground font-medium shadow-sm active:scale-[0.98] transition-all"
+              className="py-3.5 px-4 rounded-lg bg-primary text-primary-foreground font-medium text-base shadow-sm active:scale-[0.98] transition-all"
             >
               📊 История
             </button>
