@@ -211,7 +211,7 @@ export default function App() {
           </div>
           <button
             onClick={() => { setShowTemplates(true); setShowTasks(false); setShowHistory(false); }}
-            className="w-full py-3 px-4 rounded-lg bg-muted text-muted-foreground font-medium shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            className="w-full py-3.5 px-4 rounded-lg bg-muted text-muted-foreground font-medium text-base shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2"
           >
             <Repeat size={16} /> Шаблоны
           </button>
