@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Task, CategoryId, CATEGORIES, DEFAULT_SUBCATEGORIES } from "@/types";
 import { useApp } from "@/App";
-import { getCustomSubcategoriesSync } from "@/lib/taskStore";
+import { getCustomSubcategoriesSync, saveCustomSubcategories, getCategoryDisplayName, getCustomCategoryNamesSync, saveCustomCategoryNames, renameSubcategory } from "@/lib/taskStore";
 import { cn } from "@/lib/utils";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import {
@@ -19,6 +19,10 @@ export function TaskListPanel({ showArchive, onClose }: Props) {
   const [dragOverId, setDragOverId] = useState<number | null>(null);
   const [collapsedCats, setCollapsedCats] = useState<Set<CategoryId>>(new Set());
   const [collapsedSubs, setCollapsedSubs] = useState<Set<string>>(new Set());
+  const [renamingCat, setRenamingCat] = useState<CategoryId | null>(null);
+  const [renameCatText, setRenameCatText] = useState("");
+  const [renamingSub, setRenamingSub] = useState<{ cat: CategoryId; sub: string } | null>(null);
+  const [renameSubText, setRenameSubText] = useState("");
 
   const source = tasks.filter((t) => (showArchive ? t.completed : !t.completed));
 
@@ -128,10 +132,33 @@ export function TaskListPanel({ showArchive, onClose }: Props) {
     });
   };
 
+  const handleRenameCat = (cat: CategoryId) => {
+    const name = renameCatText.trim();
+    if (name) {
+      const custom = getCustomCategoryNamesSync();
+      custom[String(cat)] = name;
+      saveCustomCategoryNames(custom);
+    }
+    setRenamingCat(null);
+  };
+
+  const handleRenameSub = () => {
+    if (!renamingSub) return;
+    const newName = renameSubText.trim();
+    if (newName && newName !== renamingSub.sub) {
+      const { updatedSubs, updatedTasks } = renameSubcategory(
+        renamingSub.cat, renamingSub.sub, newName, tasks
+      );
+      saveCustomSubcategories(updatedSubs);
+      setTasks(() => updatedTasks);
+    }
+    setRenamingSub(null);
+  };
+
   return (
     <div className="bg-background rounded-lg p-4 shadow-md mb-5 animate-fade-in border border-border">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="font-display text-3xl text-primary">
+        <h2 className="font-display text-2xl sm:text-3xl text-primary">
           {showArchive ? "Выполненные" : "Все задачи"}
         </h2>
         <button onClick={onClose} className="p-2 rounded-md active:bg-muted transition-colors">
@@ -151,7 +178,6 @@ export function TaskListPanel({ showArchive, onClose }: Props) {
           if (a.active !== b.active) return a.active ? -1 : 1;
           return (a.statusChangedAt || 0) - (b.statusChangedAt || 0);
         });
-        const info = CATEGORIES[cat];
 
         // Group by subcategory
         const subGroups = new Map<string, Task[]>();
@@ -169,20 +195,42 @@ export function TaskListPanel({ showArchive, onClose }: Props) {
         return (
           <div key={cat} className="mb-4 animate-fade-in bg-white/30 rounded-lg p-2 border border-border/50">
             <div className="flex items-center gap-2 mb-2">
-              <button 
-                onClick={() => toggleCat(cat)}
-                className="flex items-center gap-2 flex-1 text-left p-1 rounded hover:bg-black/5"
-              >
-                <CategoryIcon category={cat} size={18} />
-                <span className="font-semibold text-sm">{info.name} <span className="text-xs font-normal opacity-60">({catTasks.length})</span></span>
-              </button>
-              {!showArchive && (
-                <button
-                  onClick={() => openAddModal(cat)}
-                  className="ml-auto p-1.5 rounded-md hover:bg-black/5 active:bg-black/10 transition-colors"
+              {renamingCat === cat ? (
+                <div className="flex items-center gap-1 flex-1">
+                  <input
+                    value={renameCatText}
+                    onChange={(e) => setRenameCatText(e.target.value)}
+                    onBlur={() => handleRenameCat(cat)}
+                    onKeyDown={(e) => { if (e.key === "Enter") handleRenameCat(cat); if (e.key === "Escape") setRenamingCat(null); }}
+                    className="flex-1 text-sm px-2 py-1 rounded border border-border bg-white/70 outline-none"
+                    autoFocus
+                  />
+                </div>
+              ) : (
+                <button 
+                  onClick={() => toggleCat(cat)}
+                  className="flex items-center gap-2 flex-1 text-left p-1 rounded hover:bg-black/5"
                 >
-                  <Plus size={16} />
+                  <CategoryIcon category={cat} size={18} />
+                  <span className="font-semibold text-sm sm:text-base">{getCategoryDisplayName(cat)} <span className="text-xs font-normal opacity-60">({catTasks.length})</span></span>
                 </button>
+              )}
+              {!showArchive && renamingCat !== cat && (
+                <>
+                  <button
+                    onClick={() => { setRenameCatText(getCategoryDisplayName(cat)); setRenamingCat(cat); }}
+                    className="p-1 rounded-md hover:bg-black/5 active:bg-black/10 transition-colors opacity-40 hover:opacity-70"
+                    title="Переименовать категорию"
+                  >
+                    <Pencil size={12} />
+                  </button>
+                  <button
+                    onClick={() => openAddModal(cat)}
+                    className="p-1.5 rounded-md hover:bg-black/5 active:bg-black/10 transition-colors"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </>
               )}
             </div>
             
@@ -194,13 +242,37 @@ export function TaskListPanel({ showArchive, onClose }: Props) {
                   return (
                     <div key={sub || "__none"}>
                       {sub && (
-                        <button 
-                          onClick={() => toggleSub(cat, sub)}
-                          className="flex items-center gap-1.5 w-full text-left text-sm font-medium text-foreground/80 mb-1.5 hover:text-foreground hover:bg-black/5 p-1 rounded transition-colors"
-                        >
-                          <span className="w-4 text-center">{isCollapsed ? "+" : "−"}</span>
-                          {sub} <span className="text-xs font-normal opacity-50">({subGroups.get(sub)!.length})</span>
-                        </button>
+                        <div className="flex items-center gap-1 mb-1.5">
+                          {renamingSub?.cat === cat && renamingSub?.sub === sub ? (
+                            <input
+                              value={renameSubText}
+                              onChange={(e) => setRenameSubText(e.target.value)}
+                              onBlur={handleRenameSub}
+                              onKeyDown={(e) => { if (e.key === "Enter") handleRenameSub(); if (e.key === "Escape") setRenamingSub(null); }}
+                              className="text-sm px-2 py-0.5 rounded border border-border bg-white/70 outline-none flex-1"
+                              autoFocus
+                            />
+                          ) : (
+                            <>
+                              <button 
+                                onClick={() => toggleSub(cat, sub)}
+                                className="flex items-center gap-1.5 text-left text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-black/5 p-1 rounded transition-colors"
+                              >
+                                <span className="w-4 text-center">{isCollapsed ? "+" : "−"}</span>
+                                {sub} <span className="text-xs font-normal opacity-50">({subGroups.get(sub)!.length})</span>
+                              </button>
+                              {!showArchive && (
+                                <button
+                                  onClick={() => { setRenameSubText(sub); setRenamingSub({ cat, sub }); }}
+                                  className="p-0.5 rounded hover:bg-black/5 opacity-30 hover:opacity-60 transition-opacity"
+                                  title="Переименовать подкатегорию"
+                                >
+                                  <Pencil size={10} />
+                                </button>
+                              )}
+                            </>
+                          )}
+                        </div>
                       )}
                       {(!sub || !isCollapsed) && (
                         <div className="flex flex-col gap-2">
@@ -273,6 +345,8 @@ function TaskCard({
   const [editing, setEditing] = useState(false);
   const [editText, setEditText] = useState(task.text);
   const [editingSub, setEditingSub] = useState(false);
+  const [addingCustomSub, setAddingCustomSub] = useState(false);
+  const [customSubInput, setCustomSubInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const bgMap: Record<CategoryId, string> = {
@@ -298,6 +372,22 @@ function TaskCard({
     )),
   ];
 
+  const addCustomSub = () => {
+    const val = customSubInput.trim();
+    if (!val) return;
+    const key = String(task.category);
+    const subs = getCustomSubcategoriesSync();
+    if (!subs[key]) subs[key] = [];
+    if (!subs[key].includes(val) && !(DEFAULT_SUBCATEGORIES[task.category] || []).includes(val)) {
+      subs[key] = [...subs[key], val];
+      saveCustomSubcategories(subs);
+    }
+    onUpdateSubcategory(val);
+    setCustomSubInput("");
+    setAddingCustomSub(false);
+    setEditingSub(false);
+  };
+
   return (
     <div
       draggable={!showArchive && !editing}
@@ -311,7 +401,8 @@ function TaskCard({
         !task.active && "opacity-60",
         task.completed && "opacity-70",
         isDragOver && "ring-2 ring-primary/40 scale-[1.02]",
-        "hover:shadow-md"
+        "hover:shadow-md",
+        showDropdown && "z-10"
       )}
     >
       <div className="flex items-start gap-2">
@@ -338,7 +429,7 @@ function TaskCard({
         ) : (
           <p
             className={cn(
-              "flex-1 text-sm leading-snug break-words cursor-text",
+              "flex-1 text-sm sm:text-base leading-snug break-words cursor-text",
               task.completed && "line-through"
             )}
             onClick={() => {
@@ -397,7 +488,7 @@ function TaskCard({
       </div>
 
       {/* Subcategory inline editor */}
-      {editingSub && subcategories.length > 0 && (
+      {editingSub && (
         <div className="mt-1.5 flex flex-wrap gap-1 animate-fade-in">
           <button
             onClick={() => { onUpdateSubcategory(undefined); setEditingSub(false); }}
@@ -420,6 +511,33 @@ function TaskCard({
               {sub}
             </button>
           ))}
+          {/* Add custom subcategory button */}
+          {!addingCustomSub ? (
+            <button
+              onClick={() => setAddingCustomSub(true)}
+              className="text-[10px] px-1.5 py-0.5 rounded-full border border-dashed border-foreground/20 bg-white/20 opacity-70 hover:opacity-100 flex items-center gap-0.5"
+            >
+              <Plus size={8} /> Своя
+            </button>
+          ) : (
+            <div className="flex items-center gap-1">
+              <input
+                type="text"
+                value={customSubInput}
+                onChange={(e) => setCustomSubInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") addCustomSub(); if (e.key === "Escape") setAddingCustomSub(false); }}
+                placeholder="Название..."
+                className="text-[10px] px-1.5 py-0.5 rounded-full border border-foreground/20 bg-white/60 w-20"
+                autoFocus
+              />
+              <button
+                onClick={addCustomSub}
+                className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground"
+              >
+                OK
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -431,10 +549,10 @@ function TaskCard({
             className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-black/5 active:bg-black/10 hover:bg-black/8 transition-colors"
           >
             <FolderOpen size={10} />
-            <span>{CATEGORIES[task.category].name}</span>
+            <span>{getCategoryDisplayName(task.category)}</span>
           </button>
           {showDropdown && (
-            <div className="absolute z-50 top-full left-0 mt-1 bg-background rounded-md shadow-lg p-1.5 min-w-[160px] border border-border animate-scale-in">
+            <div className="absolute z-[10200] top-full left-0 mt-1 bg-background rounded-md shadow-lg p-1.5 min-w-[160px] border border-border animate-scale-in">
               {([0, 1, 2, 5, 3, 4] as CategoryId[]).map((c) => (
                 <button
                   key={c}
@@ -442,7 +560,7 @@ function TaskCard({
                   className="w-full text-left text-xs px-2 py-1.5 rounded hover:bg-muted transition-colors flex items-center gap-1.5"
                 >
                   <CategoryIcon category={c} size={12} />
-                  {CATEGORIES[c].name}
+                  {getCategoryDisplayName(c)}
                 </button>
               ))}
             </div>
