@@ -112,6 +112,23 @@ body:is(.dark *) {
     linear-gradient(90deg, rgba(80, 70, 50, 0.15) 1px, transparent 1px);
 }
 
+/* Force light mode for timer (background images are always light) */
+.force-light {
+  --color-foreground: hsl(16 21% 25%);
+  --color-primary: hsl(16 21% 29%);
+  --color-primary-foreground: hsl(36 100% 97%);
+  --color-muted: hsl(30 10% 90%);
+  --color-muted-foreground: hsl(16 10% 45%);
+  --color-border: hsl(30 15% 82%);
+}
+
+/* Mobile font scaling */
+@media (max-width: 640px) {
+  body {
+    font-size: 16px;
+  }
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }

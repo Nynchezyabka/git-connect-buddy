@@ -179,7 +179,7 @@ export default function App() {
             <NotificationButton />
             <ThemeToggle />
           </div>
-          <h1 className="font-display text-4xl text-primary drop-shadow-sm animate-fade-in px-10">
+          <h1 className="font-display text-2xl sm:text-4xl text-primary drop-shadow-sm animate-fade-in px-10">
             🎁 КОРОБОЧКА 5.0
           </h1>
         </header>

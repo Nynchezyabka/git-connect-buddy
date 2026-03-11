@@ -79,6 +79,27 @@ export function getCustomSubcategoriesSync(): Record<string, string[]> {
 
 export async function saveCustomSubcategories(subs: Record<string, string[]>) {
   await dbSetMeta("customSubcategories", subs);
+  // Also save to localStorage for sync access
+  try { localStorage.setItem("customSubcategories", JSON.stringify(subs)); } catch {}
+}
+
+// Custom category names
+export function getCustomCategoryNamesSync(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem("customCategoryNames");
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+}
+
+export async function saveCustomCategoryNames(names: Record<string, string>) {
+  try { localStorage.setItem("customCategoryNames", JSON.stringify(names)); } catch {}
+  await dbSetMeta("customCategoryNames", names);
+}
+
+export function getCategoryDisplayName(cat: CategoryId | number): string {
+  const { CATEGORIES } = require("@/types");
+  const custom = getCustomCategoryNamesSync();
+  return custom[String(cat)] || CATEGORIES[cat as CategoryId]?.name || "Категория";
 }
 
 function sanitize(s: unknown): string {
