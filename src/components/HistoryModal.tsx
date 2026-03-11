@@ -133,7 +133,7 @@ export function HistoryModal({ onClose }: Props) {
   const selDateStr = `${selParts[2]} ${MONTH_NAMES[selParts[1] - 1]} ${selParts[0]}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3" onClick={onClose}>
+    <div className="fixed inset-0 z-[10050] flex items-center justify-center bg-black/50 p-3" onClick={onClose}>
       <div
         className="bg-background rounded-2xl shadow-xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 relative animate-scale-in"
         onClick={(e) => e.stopPropagation()}

@@ -128,7 +128,7 @@ export function TimerScreen({ task, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/40">
       <div
-        className="relative w-full h-full flex flex-col items-center justify-center p-6 text-foreground overflow-auto"
+        className="force-light relative w-full h-full flex flex-col items-center justify-center p-6 text-foreground overflow-auto"
         style={{
           backgroundColor: info.bgColor,
           backgroundImage: bgImage.current

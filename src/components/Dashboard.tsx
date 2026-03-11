@@ -1,4 +1,5 @@
 import { SECTIONS, CategoryId, CATEGORIES } from "@/types";
+import { getCategoryDisplayName } from "@/lib/taskStore";
 import { useApp } from "@/App";
 import { cn } from "@/lib/utils";
 import {

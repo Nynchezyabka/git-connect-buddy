@@ -79,6 +79,55 @@ export function getCustomSubcategoriesSync(): Record<string, string[]> {
 
 export async function saveCustomSubcategories(subs: Record<string, string[]>) {
   await dbSetMeta("customSubcategories", subs);
+  // Also save to localStorage for sync access
+  try { localStorage.setItem("customSubcategories", JSON.stringify(subs)); } catch {}
+}
+
+// Custom category names
+export function getCustomCategoryNamesSync(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem("customCategoryNames");
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+}
+
+export async function saveCustomCategoryNames(names: Record<string, string>) {
+  try { localStorage.setItem("customCategoryNames", JSON.stringify(names)); } catch {}
+  await dbSetMeta("customCategoryNames", names);
+}
+
+const DEFAULT_CAT_NAMES: Record<number, string> = {
+  0: "Категория не определена",
+  1: "Обязательные",
+  2: "Безопасность",
+  3: "Простые радости",
+  4: "Эго-радости",
+  5: "Доступность простых радостей",
+};
+
+export function getCategoryDisplayName(cat: CategoryId | number): string {
+  const custom = getCustomCategoryNamesSync();
+  return custom[String(cat)] || DEFAULT_CAT_NAMES[cat] || "Категория";
+}
+
+export function renameSubcategory(
+  cat: CategoryId,
+  oldName: string,
+  newName: string,
+  tasks: Task[]
+): { updatedSubs: Record<string, string[]>; updatedTasks: Task[] } {
+  const subs = getCustomSubcategoriesSync();
+  const key = String(cat);
+  if (subs[key]) {
+    subs[key] = subs[key].map(s => s === oldName ? newName : s);
+  }
+  const updatedTasks = tasks.map(t => {
+    if (t.category === cat && t.subcategory === oldName) {
+      return { ...t, subcategory: newName };
+    }
+    return t;
+  });
+  return { updatedSubs: subs, updatedTasks };
 }
 
 function sanitize(s: unknown): string {
