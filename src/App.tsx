@@ -204,7 +204,7 @@ export default function App() {
             </button>
             <button
               onClick={handleExport}
-              className="py-3 px-4 rounded-lg bg-primary text-primary-foreground font-medium shadow-sm active:scale-[0.98] transition-all"
+              className="py-3.5 px-4 rounded-lg bg-primary text-primary-foreground font-medium text-base shadow-sm active:scale-[0.98] transition-all"
             >
               Скачать задачи
             </button>
