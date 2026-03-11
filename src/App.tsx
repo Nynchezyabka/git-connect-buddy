@@ -191,7 +191,7 @@ export default function App() {
         <div className="flex flex-col gap-2.5 my-5">
           <button
             onClick={() => { setShowArchive(false); setShowTasks(true); setShowTemplates(false); setShowHistory(false); }}
-            className="w-full py-3 px-4 rounded-lg bg-primary text-primary-foreground font-medium shadow-sm active:scale-[0.98] transition-all"
+            className="w-full py-3.5 px-4 rounded-lg bg-primary text-primary-foreground font-medium text-base shadow-sm active:scale-[0.98] transition-all"
           >
             Все задачи
           </button>
