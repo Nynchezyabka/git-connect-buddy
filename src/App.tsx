@@ -191,31 +191,31 @@ export default function App() {
         <div className="flex flex-col gap-2.5 my-5">
           <button
             onClick={() => { setShowArchive(false); setShowTasks(true); setShowTemplates(false); setShowHistory(false); }}
-            className="w-full py-3 px-4 rounded-lg bg-primary text-primary-foreground font-medium shadow-sm active:scale-[0.98] transition-all"
+            className="w-full py-3.5 px-4 rounded-lg bg-primary text-primary-foreground font-medium text-base shadow-sm active:scale-[0.98] transition-all"
           >
             Все задачи
           </button>
           <div className="grid grid-cols-2 gap-2.5">
             <button
               onClick={() => { setShowHistory(true); setShowTasks(false); setShowTemplates(false); }}
-              className="py-3 px-4 rounded-lg bg-primary text-primary-foreground font-medium shadow-sm active:scale-[0.98] transition-all"
+              className="py-3.5 px-4 rounded-lg bg-primary text-primary-foreground font-medium text-base shadow-sm active:scale-[0.98] transition-all"
             >
               📊 История
             </button>
             <button
               onClick={handleExport}
-              className="py-3 px-4 rounded-lg bg-primary text-primary-foreground font-medium shadow-sm active:scale-[0.98] transition-all"
+              className="py-3.5 px-4 rounded-lg bg-primary text-primary-foreground font-medium text-base shadow-sm active:scale-[0.98] transition-all"
             >
               Скачать задачи
             </button>
           </div>
           <button
             onClick={() => { setShowTemplates(true); setShowTasks(false); setShowHistory(false); }}
-            className="w-full py-3 px-4 rounded-lg bg-muted text-muted-foreground font-medium shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            className="w-full py-3.5 px-4 rounded-lg bg-muted text-muted-foreground font-medium text-base shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2"
           >
             <Repeat size={16} /> Шаблоны
           </button>
-          <label className="w-full py-3 px-4 rounded-lg bg-muted text-muted-foreground font-medium text-center cursor-pointer shadow-sm active:scale-[0.98] transition-all">
+          <label className="w-full py-3.5 px-4 rounded-lg bg-muted text-muted-foreground font-medium text-base text-center cursor-pointer shadow-sm active:scale-[0.98] transition-all">
             📂 Загрузить из файла
             <input
               type="file"
