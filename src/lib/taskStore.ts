@@ -97,9 +97,28 @@ export async function saveCustomCategoryNames(names: Record<string, string>) {
 }
 
 export function getCategoryDisplayName(cat: CategoryId | number): string {
-  const { CATEGORIES } = require("@/types");
   const custom = getCustomCategoryNamesSync();
-  return custom[String(cat)] || CATEGORIES[cat as CategoryId]?.name || "Категория";
+  if (custom[String(cat)]) return custom[String(cat)];
+  const { CATEGORIES } = await_types();
+  return CATEGORIES[cat as CategoryId]?.name || "Категория";
+}
+
+// Lazy import to avoid circular deps
+function await_types() {
+  // Direct import since types has no side effects
+  return { CATEGORIES: require_categories() };
+}
+
+// Inline category names to avoid circular dependency
+function require_categories(): Record<number, { name: string }> {
+  return {
+    0: { name: "Категория не определена" },
+    1: { name: "Обязательные" },
+    2: { name: "Безопасность" },
+    3: { name: "Простые радости" },
+    4: { name: "Эго-радости" },
+    5: { name: "Доступность простых радостей" },
+  };
 }
 
 function sanitize(s: unknown): string {
