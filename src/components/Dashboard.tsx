@@ -46,10 +46,10 @@ export function Dashboard({ onRandomTask }: Props) {
             style={{ animationDelay: `${idx * 80}ms`, animationFillMode: "both" }}
             onClick={() => onRandomTask(section.categories)}
           >
-            <h2 className="font-display text-2xl text-center leading-tight">
+            <h2 className="font-display text-xl sm:text-2xl text-center leading-tight">
               {section.title}
             </h2>
-            <div className="flex justify-center gap-4 text-xs font-semibold text-foreground/70 mt-2">
+            <div className="flex justify-center gap-4 text-sm sm:text-xs font-semibold text-foreground/70 mt-2">
               <span>Активных: {active}</span>
               <span>Выполнено: {completed}</span>
             </div>
