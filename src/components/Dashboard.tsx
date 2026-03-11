@@ -67,7 +67,7 @@ export function Dashboard({ onRandomTask }: Props) {
             <div className="flex justify-center gap-2 mt-3">
               <button
                 onClick={(e) => { e.stopPropagation(); onRandomTask(section.categories); }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/50 text-sm font-medium active:scale-95 hover:bg-white/70 transition-all"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/50 text-sm sm:text-xs font-medium active:scale-95 hover:bg-white/70 transition-all"
               >
                 <Dices size={16} />
                 <span>случайная задача</span>

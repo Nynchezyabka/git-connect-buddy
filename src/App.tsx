@@ -215,7 +215,7 @@ export default function App() {
           >
             <Repeat size={16} /> Шаблоны
           </button>
-          <label className="w-full py-3 px-4 rounded-lg bg-muted text-muted-foreground font-medium text-center cursor-pointer shadow-sm active:scale-[0.98] transition-all">
+          <label className="w-full py-3.5 px-4 rounded-lg bg-muted text-muted-foreground font-medium text-base text-center cursor-pointer shadow-sm active:scale-[0.98] transition-all">
             📂 Загрузить из файла
             <input
               type="file"
