@@ -195,7 +195,13 @@ export default function App() {
           >
             Все задачи
           </button>
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-3 gap-2.5">
+            <button
+              onClick={() => { setShowArchive(true); setShowTasks(true); setShowTemplates(false); setShowHistory(false); }}
+              className="py-3.5 px-4 rounded-lg bg-primary text-primary-foreground font-medium text-base shadow-sm active:scale-[0.98] transition-all"
+            >
+              ✅ Архив
+            </button>
             <button
               onClick={() => { setShowHistory(true); setShowTasks(false); setShowTemplates(false); }}
               className="py-3.5 px-4 rounded-lg bg-primary text-primary-foreground font-medium text-base shadow-sm active:scale-[0.98] transition-all"
@@ -206,7 +212,7 @@ export default function App() {
               onClick={handleExport}
               className="py-3.5 px-4 rounded-lg bg-primary text-primary-foreground font-medium text-base shadow-sm active:scale-[0.98] transition-all"
             >
-              Скачать задачи
+              💾 Скачать
             </button>
           </div>
           <button
