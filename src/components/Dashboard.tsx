@@ -8,9 +8,9 @@ import {
 } from "lucide-react";
 
 const sectionColors: Record<string, string> = {
-  mandatory: "bg-cat-1-bg border-t-4 border-t-cat-1",
-  security: "bg-cat-2-bg border-t-4 border-t-cat-2",
-  joys: "bg-cat-3-bg border-t-4 border-t-cat-3",
+  mandatory: "bg-cat-1-bg border-t-[8px] border-t-cat-1",
+  security: "bg-cat-2-bg border-t-[8px] border-t-cat-2",
+  joys: "bg-cat-3-bg border-t-[8px] border-t-cat-3",
 };
 
 interface Props {
