@@ -45,9 +45,8 @@ export function Dashboard({ onRandomTask }: Props) {
             <h2 className="font-display text-xl sm:text-lg md:text-xl text-center leading-tight">
               {section.title}
             </h2>
-            <div className="flex justify-center gap-4 text-sm sm:text-xs font-semibold text-foreground/70 mt-2">
+            <div className="flex justify-center text-sm sm:text-xs font-semibold text-foreground/70 mt-2">
               <span>Активных: {active}</span>
-              <span>Выполнено: {completed}</span>
             </div>
             <div className="flex justify-center gap-2 mt-3">
               <button
