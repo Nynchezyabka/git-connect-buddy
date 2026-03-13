@@ -28,7 +28,7 @@ export function Dashboard({ onRandomTask }: Props) {
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
       {SECTIONS.map((section, idx) => {
         const active = countActive(section.categories);
-        const completed = countCompleted(section.categories);
+        
         return (
           <div
             key={section.sectionClass}
