@@ -26,8 +26,6 @@ export function Dashboard({ onRandomTask }: Props) {
   const countCompleted = (cats: CategoryId[]) =>
     tasks.filter((t) => cats.includes(t.category) && t.completed).length;
 
-  const countTotal = (cats: CategoryId[]) =>
-    tasks.filter((t) => cats.includes(t.category)).length;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

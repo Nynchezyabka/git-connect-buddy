@@ -120,6 +120,12 @@ body:is(.dark *) {
   --color-muted: hsl(30 10% 90%);
   --color-muted-foreground: hsl(16 10% 45%);
   --color-border: hsl(30 15% 82%);
+  --color-cat-0-bg: #f5f5f5;
+  --color-cat-1-bg: #fff9c4;
+  --color-cat-2-bg: #bbdefb;
+  --color-cat-3-bg: #c8e6c9;
+  --color-cat-4-bg: #ffcdd2;
+  --color-cat-5-bg: #d1c4e9;
 }
 
 /* Mobile font scaling */
