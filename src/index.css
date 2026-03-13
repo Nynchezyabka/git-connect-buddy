@@ -69,27 +69,27 @@
 /* Dark theme */
 .dark {
   --color-background: hsl(20 10% 12%);
-  --color-foreground: hsl(36 30% 88%);
+  --color-foreground: hsl(36 30% 92%);
   --color-primary: hsl(36 40% 70%);
   --color-primary-foreground: hsl(20 10% 12%);
   --color-muted: hsl(20 8% 22%);
-  --color-muted-foreground: hsl(30 10% 55%);
+  --color-muted-foreground: hsl(30 10% 60%);
   --color-accent: hsl(45 80% 55%);
   --color-accent-foreground: hsl(20 10% 12%);
   --color-border: hsl(20 8% 28%);
 
-  --color-cat-0: #757575;
-  --color-cat-0-bg: #2a2a2a;
-  --color-cat-1: #F9A825;
-  --color-cat-1-bg: #3d3520;
-  --color-cat-2: #42A5F5;
-  --color-cat-2-bg: #1a2d3d;
-  --color-cat-3: #66BB6A;
-  --color-cat-3-bg: #1e3020;
-  --color-cat-4: #EF5350;
-  --color-cat-4-bg: #3d1a1a;
-  --color-cat-5: #7E57C2;
-  --color-cat-5-bg: #2a1f3d;
+  --color-cat-0: #9E9E9E;
+  --color-cat-0-bg: #3a3a3a;
+  --color-cat-1: #FFD54F;
+  --color-cat-1-bg: #4a4020;
+  --color-cat-2: #64B5F6;
+  --color-cat-2-bg: #223a50;
+  --color-cat-3: #81C784;
+  --color-cat-3-bg: #254028;
+  --color-cat-4: #E57373;
+  --color-cat-4-bg: #4a2222;
+  --color-cat-5: #9575CD;
+  --color-cat-5-bg: #352a4d;
 }
 
 body {
