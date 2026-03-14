@@ -156,15 +156,20 @@ export function TaskListPanel({ showArchive, onClose }: Props) {
   };
 
   return (
-    <div className="bg-background rounded-lg p-4 shadow-md mb-5 animate-fade-in border border-border">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="font-display text-2xl sm:text-3xl text-primary">
-          {showArchive ? "Выполненные" : "Все задачи"}
-        </h2>
-        <button onClick={onClose} className="p-2 rounded-md active:bg-muted transition-colors">
-          <X size={20} />
-        </button>
-      </div>
+    <div className="fixed inset-0 z-[10050] flex items-center justify-center bg-black/50 p-3" onClick={onClose}>
+      <div
+        className="bg-background rounded-2xl shadow-xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 relative animate-scale-in"
+        onClick={(e) => e.stopPropagation()}
+      >
+      <button
+        onClick={onClose}
+        className="absolute top-3 right-3 p-1.5 rounded-full bg-muted text-muted-foreground hover:bg-border transition-colors z-10"
+      >
+        <X size={18} />
+      </button>
+      <h2 className="font-display text-2xl text-primary mb-3">
+        {showArchive ? "✅ Выполненные" : "📋 Все задачи"}
+      </h2>
 
       {categoryOrder.length === 0 && (
         <p className="text-center text-muted-foreground py-8 animate-fade-in">
