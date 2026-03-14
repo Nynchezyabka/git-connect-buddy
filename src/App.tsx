@@ -178,6 +178,14 @@ export default function App() {
           <div className="absolute right-0 top-1 flex items-center gap-1.5 z-10">
             <NotificationButton />
             <ThemeToggle />
+            <SideMenu
+              onShowTasks={() => { setShowArchive(false); setShowTasks(true); setShowTemplates(false); setShowHistory(false); }}
+              onShowArchive={() => { setShowArchive(true); setShowTasks(true); setShowTemplates(false); setShowHistory(false); }}
+              onShowHistory={() => { setShowHistory(true); setShowTasks(false); setShowTemplates(false); }}
+              onShowTemplates={() => { setShowTemplates(true); setShowTasks(false); setShowHistory(false); }}
+              onExport={handleExport}
+              onImport={handleImport}
+            />
           </div>
           <h1 className="font-display text-2xl sm:text-4xl text-primary drop-shadow-sm animate-fade-in px-10">
             🎁 КОРОБОЧКА 5.0
