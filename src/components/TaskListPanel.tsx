@@ -5,15 +5,14 @@ import { getCustomSubcategoriesSync, saveCustomSubcategories, getCategoryDisplay
 import { cn } from "@/lib/utils";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import {
-  Play, Eye, EyeOff, Trash2, Check, Undo2, FolderOpen, Plus, X, Pencil, GripVertical,
+  Play, Eye, EyeOff, Trash2, Check, Undo2, FolderOpen, Plus, Pencil, GripVertical,
 } from "lucide-react";
 
 interface Props {
   showArchive: boolean;
-  onClose: () => void;
 }
 
-export function TaskListPanel({ showArchive, onClose }: Props) {
+export function TaskListPanel({ showArchive }: Props) {
   const { tasks, setTasks, openTimer, openAddModal } = useApp();
   const [dragId, setDragId] = useState<number | null>(null);
   const [dragOverId, setDragOverId] = useState<number | null>(null);
@@ -156,17 +155,7 @@ export function TaskListPanel({ showArchive, onClose }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-[10050] flex items-center justify-center bg-black/50 p-3" onClick={onClose}>
-      <div
-        className="bg-background rounded-2xl shadow-xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 relative animate-scale-in"
-        onClick={(e) => e.stopPropagation()}
-      >
-      <button
-        onClick={onClose}
-        className="absolute top-3 right-3 p-1.5 rounded-full bg-muted text-muted-foreground hover:bg-border transition-colors z-10"
-      >
-        <X size={18} />
-      </button>
+    <div className="animate-fade-in">
       <h2 className="font-display text-2xl text-primary mb-3">
         {showArchive ? "✅ Выполненные" : "📋 Все задачи"}
       </h2>
@@ -198,7 +187,7 @@ export function TaskListPanel({ showArchive, onClose }: Props) {
         });
 
         return (
-          <div key={cat} className="mb-4 animate-fade-in bg-white/30 rounded-lg p-2 border border-border/50">
+          <div key={cat} className="mb-4 animate-fade-in bg-white/30 dark:bg-white/5 rounded-lg p-2 border border-border/50">
             <div className="flex items-center gap-2 mb-2">
               {renamingCat === cat ? (
                 <div className="flex items-center gap-1 flex-1">
@@ -207,14 +196,14 @@ export function TaskListPanel({ showArchive, onClose }: Props) {
                     onChange={(e) => setRenameCatText(e.target.value)}
                     onBlur={() => handleRenameCat(cat)}
                     onKeyDown={(e) => { if (e.key === "Enter") handleRenameCat(cat); if (e.key === "Escape") setRenamingCat(null); }}
-                    className="flex-1 text-sm px-2 py-1 rounded border border-border bg-white/70 outline-none"
+                    className="flex-1 text-sm px-2 py-1 rounded border border-border bg-white/70 dark:bg-white/10 outline-none"
                     autoFocus
                   />
                 </div>
               ) : (
                 <button 
                   onClick={() => toggleCat(cat)}
-                  className="flex items-center gap-2 flex-1 text-left p-1 rounded hover:bg-black/5"
+                  className="flex items-center gap-2 flex-1 text-left p-1 rounded hover:bg-black/5 dark:hover:bg-white/5"
                 >
                   <CategoryIcon category={cat} size={18} />
                   <span className="font-semibold text-sm sm:text-base">{getCategoryDisplayName(cat)} <span className="text-xs font-normal opacity-60">({catTasks.length})</span></span>
@@ -254,14 +243,14 @@ export function TaskListPanel({ showArchive, onClose }: Props) {
                               onChange={(e) => setRenameSubText(e.target.value)}
                               onBlur={handleRenameSub}
                               onKeyDown={(e) => { if (e.key === "Enter") handleRenameSub(); if (e.key === "Escape") setRenamingSub(null); }}
-                              className="text-sm px-2 py-0.5 rounded border border-border bg-white/70 outline-none flex-1"
+                              className="text-sm px-2 py-0.5 rounded border border-border bg-white/70 dark:bg-white/10 outline-none flex-1"
                               autoFocus
                             />
                           ) : (
                             <>
                               <button 
                                 onClick={() => toggleSub(cat, sub)}
-                                className="flex items-center gap-1.5 text-left text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-black/5 p-1 rounded transition-colors"
+                                className="flex items-center gap-1.5 text-left text-sm font-medium text-foreground/80 hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 p-1 rounded transition-colors"
                               >
                                 <span className="w-4 text-center">{isCollapsed ? "+" : "−"}</span>
                                 {sub} <span className="text-xs font-normal opacity-50">({subGroups.get(sub)!.length})</span>
@@ -311,14 +300,6 @@ export function TaskListPanel({ showArchive, onClose }: Props) {
           </div>
         );
       })}
-
-      <button
-        onClick={onClose}
-        className="w-full mt-2 py-3 rounded-lg bg-primary text-primary-foreground font-medium active:scale-[0.98] transition-all"
-      >
-        Закрыть
-      </button>
-      </div>
     </div>
   );
 }
@@ -429,7 +410,7 @@ function TaskCard({
               if (e.key === "Enter") saveEdit();
               if (e.key === "Escape") { setEditText(task.text); setEditing(false); }
             }}
-            className="flex-1 text-sm bg-white/70 rounded px-2 py-1 border border-border outline-none focus:ring-1 focus:ring-primary/30"
+            className="flex-1 text-sm bg-white/70 dark:bg-white/10 rounded px-2 py-1 border border-border outline-none focus:ring-1 focus:ring-primary/30"
             autoFocus
           />
         ) : (
