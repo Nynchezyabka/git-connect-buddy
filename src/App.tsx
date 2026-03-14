@@ -10,7 +10,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationButton } from "@/components/NotificationButton";
 import { InfoButton } from "@/components/InfoButton";
 import { TemplatesPanel } from "@/components/TemplatesPanel";
-import { SideMenu } from "@/components/SideMenu";
+import { AppSidebar, PageId } from "@/components/AppSidebar";
 import { HistoryModal } from "@/components/HistoryModal";
 import { OnboardingScreen } from "@/components/OnboardingScreen";
 import { processRecurringTemplates } from "@/lib/recurring";
@@ -31,10 +31,7 @@ export default function App() {
   const [templates, setTemplatesRaw] = useState<TaskTemplate[]>([]);
   const [ready, setReady] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showTasks, setShowTasks] = useState(false);
-  const [showArchive, setShowArchive] = useState(false);
-  const [showTemplates, setShowTemplates] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
+  const [currentPage, setCurrentPage] = useState<PageId>("home");
   const [timerTask, setTimerTask] = useState<Task | null>(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addModalCategory, setAddModalCategory] = useState<CategoryId>(0);
@@ -48,12 +45,9 @@ export default function App() {
     ]).then(([loaded, tpls]) => {
       setTasksRaw(loaded);
       setTemplatesRaw(tpls ?? []);
-
-      // Check onboarding
       if (!localStorage.getItem("onboarding_done") && loaded.length === 0) {
         setShowOnboarding(true);
       }
-
       setReady(true);
     });
   }, []);
@@ -61,7 +55,6 @@ export default function App() {
   // Process recurring templates on load and every 30 minutes
   useEffect(() => {
     if (!ready || templates.length === 0) return;
-
     const process = () => {
       const { newTasks, updatedTemplates } = processRecurringTemplates(templates, tasks);
       if (newTasks.length > 0) {
@@ -75,7 +68,6 @@ export default function App() {
         dbSetMeta("templates", updatedTemplates);
       }
     };
-
     process();
     const interval = setInterval(process, 30 * 60 * 1000);
     return () => clearInterval(interval);
@@ -167,72 +159,65 @@ export default function App() {
     return <OnboardingScreen onComplete={() => setShowOnboarding(false)} />;
   }
 
+  const renderPage = () => {
+    switch (currentPage) {
+      case "tasks":
+        return <TaskListPanel showArchive={false} />;
+      case "archive":
+        return <TaskListPanel showArchive={true} />;
+      case "history":
+        return <HistoryModal />;
+      case "templates":
+        return <TemplatesPanel templates={templates} onSave={saveTemplates} />;
+      default:
+        return <Dashboard onRandomTask={handleRandomTask} />;
+    }
+  };
+
   return (
     <AppContext.Provider value={ctx}>
-      <div className="max-w-4xl mx-auto p-2.5">
-        {/* Header */}
-        <header className="text-center mb-4 pt-1 relative">
-          <div className="absolute left-0 top-1 z-10">
-            <InfoButton />
-          </div>
-          <div className="absolute right-0 top-1 flex items-center gap-1.5 z-10">
-            <NotificationButton />
-            <ThemeToggle />
-            <SideMenu
-              onShowTasks={() => { setShowArchive(false); setShowTasks(true); setShowTemplates(false); setShowHistory(false); }}
-              onShowArchive={() => { setShowArchive(true); setShowTasks(true); setShowTemplates(false); setShowHistory(false); }}
-              onShowHistory={() => { setShowHistory(true); setShowTasks(false); setShowTemplates(false); }}
-              onShowTemplates={() => { setShowTemplates(true); setShowTasks(false); setShowHistory(false); }}
-              onExport={handleExport}
-              onImport={handleImport}
-            />
-          </div>
-          <h1 className="font-display text-2xl sm:text-4xl text-primary drop-shadow-sm animate-fade-in px-10">
-            🎁 КОРОБОЧКА 5.0
-          </h1>
-        </header>
+      <AppSidebar
+        currentPage={currentPage}
+        onNavigate={setCurrentPage}
+        onExport={handleExport}
+        onImport={handleImport}
+      />
 
-        {/* Dashboard sections */}
-        <Dashboard onRandomTask={handleRandomTask} />
+      <div className="ml-12 transition-all duration-300">
+        <div className="max-w-4xl mx-auto p-2.5">
+          {/* Header */}
+          <header className="text-center mb-4 pt-1 relative">
+            <div className="absolute left-0 top-1 z-10">
+              <InfoButton />
+            </div>
+            <div className="absolute right-0 top-1 flex items-center gap-1.5 z-10">
+              <NotificationButton />
+              <ThemeToggle />
+            </div>
+            <h1 className="font-display text-2xl sm:text-4xl text-primary drop-shadow-sm animate-fade-in px-10">
+              🎁 КОРОБОЧКА 5.0
+            </h1>
+          </header>
 
-
-        {/* Templates panel */}
-        {showTemplates && (
-          <TemplatesPanel
-            templates={templates}
-            onSave={saveTemplates}
-            onClose={() => setShowTemplates(false)}
-          />
-        )}
-
-        {/* History modal */}
-        {showHistory && (
-          <HistoryModal onClose={() => setShowHistory(false)} />
-        )}
-
-        {/* Task list panel */}
-        {showTasks && (
-          <TaskListPanel
-            showArchive={showArchive}
-            onClose={() => setShowTasks(false)}
-          />
-        )}
-
-        {/* Timer */}
-        {timerTask && (
-          <TimerScreen task={timerTask} onClose={() => setTimerTask(null)} />
-        )}
-
-        {/* Add modal */}
-        {addModalOpen && (
-          <AddTaskModal
-            defaultCategory={addModalCategory}
-            restrictCategories={addModalRestrict}
-            onAdd={handleAddTask}
-            onClose={() => setAddModalOpen(false)}
-          />
-        )}
+          {/* Page content */}
+          {renderPage()}
+        </div>
       </div>
+
+      {/* Timer (stays modal) */}
+      {timerTask && (
+        <TimerScreen task={timerTask} onClose={() => setTimerTask(null)} />
+      )}
+
+      {/* Add modal (stays modal) */}
+      {addModalOpen && (
+        <AddTaskModal
+          defaultCategory={addModalCategory}
+          restrictCategories={addModalRestrict}
+          onAdd={handleAddTask}
+          onClose={() => setAddModalOpen(false)}
+        />
+      )}
     </AppContext.Provider>
   );
 }

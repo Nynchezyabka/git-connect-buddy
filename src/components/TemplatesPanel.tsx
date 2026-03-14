@@ -2,16 +2,15 @@ import { useState } from "react";
 import { TaskTemplate, CategoryId, CATEGORIES, RecurrenceType, RECURRENCE_LABELS, WEEKDAYS, DEFAULT_SUBCATEGORIES } from "@/types";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { cn } from "@/lib/utils";
-import { X, Plus, Trash2, ToggleLeft, ToggleRight, Repeat } from "lucide-react";
+import { Plus, Trash2, ToggleLeft, ToggleRight, Repeat } from "lucide-react";
 import { getCustomSubcategoriesSync } from "@/lib/taskStore";
 
 interface Props {
   templates: TaskTemplate[];
   onSave: (templates: TaskTemplate[]) => void;
-  onClose: () => void;
 }
 
-export function TemplatesPanel({ templates, onSave, onClose }: Props) {
+export function TemplatesPanel({ templates, onSave }: Props) {
   const [editing, setEditing] = useState<TaskTemplate | null>(null);
   const [showForm, setShowForm] = useState(false);
 
@@ -37,17 +36,7 @@ export function TemplatesPanel({ templates, onSave, onClose }: Props) {
   const nextId = templates.reduce((max, t) => Math.max(max, t.id), 0) + 1;
 
   return (
-    <div className="fixed inset-0 z-[10050] flex items-center justify-center bg-black/50 p-3" onClick={onClose}>
-      <div
-        className="bg-background rounded-2xl shadow-xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 relative animate-scale-in"
-        onClick={(e) => e.stopPropagation()}
-      >
-      <button
-        onClick={onClose}
-        className="absolute top-3 right-3 p-1.5 rounded-full bg-muted text-muted-foreground hover:bg-border transition-colors z-10"
-      >
-        <X size={18} />
-      </button>
+    <div className="animate-fade-in">
       <h2 className="font-display text-2xl text-primary flex items-center gap-2 mb-3">
         <Repeat size={22} /> Шаблоны
       </h2>
@@ -109,7 +98,6 @@ export function TemplatesPanel({ templates, onSave, onClose }: Props) {
           <Plus size={16} /> Новый шаблон
         </button>
       )}
-      </div>
     </div>
   );
 }
