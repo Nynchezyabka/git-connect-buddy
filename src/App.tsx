@@ -10,6 +10,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationButton } from "@/components/NotificationButton";
 import { InfoButton } from "@/components/InfoButton";
 import { TemplatesPanel } from "@/components/TemplatesPanel";
+import { SideMenu } from "@/components/SideMenu";
 import { HistoryModal } from "@/components/HistoryModal";
 import { OnboardingScreen } from "@/components/OnboardingScreen";
 import { processRecurringTemplates } from "@/lib/recurring";
