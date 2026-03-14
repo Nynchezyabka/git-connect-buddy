@@ -109,6 +109,7 @@ export function TemplatesPanel({ templates, onSave, onClose }: Props) {
           <Plus size={16} /> Новый шаблон
         </button>
       )}
+      </div>
     </div>
   );
 }

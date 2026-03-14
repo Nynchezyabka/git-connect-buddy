@@ -316,8 +316,9 @@ export function TaskListPanel({ showArchive, onClose }: Props) {
         onClick={onClose}
         className="w-full mt-2 py-3 rounded-lg bg-primary text-primary-foreground font-medium active:scale-[0.98] transition-all"
       >
-        Скрыть список
+        Закрыть
       </button>
+      </div>
     </div>
   );
 }
