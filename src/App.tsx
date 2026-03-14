@@ -10,11 +10,11 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationButton } from "@/components/NotificationButton";
 import { InfoButton } from "@/components/InfoButton";
 import { TemplatesPanel } from "@/components/TemplatesPanel";
+import { SideMenu } from "@/components/SideMenu";
 import { HistoryModal } from "@/components/HistoryModal";
 import { OnboardingScreen } from "@/components/OnboardingScreen";
 import { processRecurringTemplates } from "@/lib/recurring";
 import { toast } from "sonner";
-import { Repeat } from "lucide-react";
 
 interface AppContextValue {
   tasks: Task[];
@@ -178,6 +178,14 @@ export default function App() {
           <div className="absolute right-0 top-1 flex items-center gap-1.5 z-10">
             <NotificationButton />
             <ThemeToggle />
+            <SideMenu
+              onShowTasks={() => { setShowArchive(false); setShowTasks(true); setShowTemplates(false); setShowHistory(false); }}
+              onShowArchive={() => { setShowArchive(true); setShowTasks(true); setShowTemplates(false); setShowHistory(false); }}
+              onShowHistory={() => { setShowHistory(true); setShowTasks(false); setShowTemplates(false); }}
+              onShowTemplates={() => { setShowTemplates(true); setShowTasks(false); setShowHistory(false); }}
+              onExport={handleExport}
+              onImport={handleImport}
+            />
           </div>
           <h1 className="font-display text-2xl sm:text-4xl text-primary drop-shadow-sm animate-fade-in px-10">
             🎁 КОРОБОЧКА 5.0
@@ -187,54 +195,6 @@ export default function App() {
         {/* Dashboard sections */}
         <Dashboard onRandomTask={handleRandomTask} />
 
-        {/* Controls */}
-        <div className="flex flex-col gap-2.5 my-5">
-          <button
-            onClick={() => { setShowArchive(false); setShowTasks(true); setShowTemplates(false); setShowHistory(false); }}
-            className="w-full py-3.5 px-4 rounded-lg bg-primary text-primary-foreground font-medium text-base shadow-sm active:scale-[0.98] transition-all"
-          >
-            Все задачи
-          </button>
-          <div className="grid grid-cols-3 gap-2.5">
-            <button
-              onClick={() => { setShowArchive(true); setShowTasks(true); setShowTemplates(false); setShowHistory(false); }}
-              className="py-3.5 px-4 rounded-lg bg-primary text-primary-foreground font-medium text-base shadow-sm active:scale-[0.98] transition-all"
-            >
-              ✅ Архив
-            </button>
-            <button
-              onClick={() => { setShowHistory(true); setShowTasks(false); setShowTemplates(false); }}
-              className="py-3.5 px-4 rounded-lg bg-primary text-primary-foreground font-medium text-base shadow-sm active:scale-[0.98] transition-all"
-            >
-              📊 История
-            </button>
-            <button
-              onClick={handleExport}
-              className="py-3.5 px-4 rounded-lg bg-primary text-primary-foreground font-medium text-base shadow-sm active:scale-[0.98] transition-all"
-            >
-              💾 Скачать
-            </button>
-          </div>
-          <button
-            onClick={() => { setShowTemplates(true); setShowTasks(false); setShowHistory(false); }}
-            className="w-full py-3.5 px-4 rounded-lg bg-muted text-muted-foreground font-medium text-base shadow-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-          >
-            <Repeat size={16} /> Шаблоны
-          </button>
-          <label className="w-full py-3.5 px-4 rounded-lg bg-muted text-muted-foreground font-medium text-base text-center cursor-pointer shadow-sm active:scale-[0.98] transition-all">
-            📂 Загрузить из файла
-            <input
-              type="file"
-              accept=".json"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) handleImport(f);
-                e.target.value = "";
-              }}
-            />
-          </label>
-        </div>
 
         {/* Templates panel */}
         {showTemplates && (

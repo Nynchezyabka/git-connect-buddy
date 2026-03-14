@@ -37,15 +37,20 @@ export function TemplatesPanel({ templates, onSave, onClose }: Props) {
   const nextId = templates.reduce((max, t) => Math.max(max, t.id), 0) + 1;
 
   return (
-    <div className="bg-background rounded-lg p-4 shadow-md mb-5 animate-fade-in border border-border">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="font-display text-2xl text-primary flex items-center gap-2">
-          <Repeat size={22} /> Шаблоны
-        </h2>
-        <button onClick={onClose} className="p-2 rounded-md active:bg-muted transition-colors">
-          <X size={20} />
-        </button>
-      </div>
+    <div className="fixed inset-0 z-[10050] flex items-center justify-center bg-black/50 p-3" onClick={onClose}>
+      <div
+        className="bg-background rounded-2xl shadow-xl w-full max-w-lg max-h-[92vh] overflow-y-auto p-5 relative animate-scale-in"
+        onClick={(e) => e.stopPropagation()}
+      >
+      <button
+        onClick={onClose}
+        className="absolute top-3 right-3 p-1.5 rounded-full bg-muted text-muted-foreground hover:bg-border transition-colors z-10"
+      >
+        <X size={18} />
+      </button>
+      <h2 className="font-display text-2xl text-primary flex items-center gap-2 mb-3">
+        <Repeat size={22} /> Шаблоны
+      </h2>
 
       {templates.length === 0 && !showForm && (
         <p className="text-center text-muted-foreground py-6">
@@ -104,6 +109,7 @@ export function TemplatesPanel({ templates, onSave, onClose }: Props) {
           <Plus size={16} /> Новый шаблон
         </button>
       )}
+      </div>
     </div>
   );
 }
