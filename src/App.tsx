@@ -7,7 +7,6 @@ import { TaskListPanel } from "@/components/TaskListPanel";
 import { TimerScreen } from "@/components/TimerScreen";
 import { AddTaskModal } from "@/components/AddTaskModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { NotificationButton } from "@/components/NotificationButton";
 import { InfoButton } from "@/components/InfoButton";
 import { TemplatesPanel } from "@/components/TemplatesPanel";
 import { AppSidebar, PageId } from "@/components/AppSidebar";
@@ -36,6 +35,7 @@ export default function App() {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addModalCategory, setAddModalCategory] = useState<CategoryId>(0);
   const [addModalRestrict, setAddModalRestrict] = useState<CategoryId[] | null>(null);
+  const [showInfo, setShowInfo] = useState(false);
 
   // Initialize IndexedDB and load tasks + templates
   useEffect(() => {
@@ -181,17 +181,14 @@ export default function App() {
         onNavigate={setCurrentPage}
         onExport={handleExport}
         onImport={handleImport}
+        onShowInfo={() => setShowInfo(true)}
       />
 
       <div className="ml-12 transition-all duration-300">
         <div className="max-w-4xl mx-auto p-2.5">
           {/* Header */}
           <header className="text-center mb-4 pt-1 relative">
-            <div className="absolute left-0 top-1 z-10">
-              <InfoButton />
-            </div>
             <div className="absolute right-0 top-1 flex items-center gap-1.5 z-10">
-              <NotificationButton />
               <ThemeToggle />
             </div>
             <h1 className="font-display text-2xl sm:text-4xl text-primary drop-shadow-sm animate-fade-in px-10">
@@ -203,6 +200,9 @@ export default function App() {
           {renderPage()}
         </div>
       </div>
+
+      {/* Info modal */}
+      {showInfo && <InfoModal onClose={() => setShowInfo(false)} />}
 
       {/* Timer (stays modal) */}
       {timerTask && (
@@ -219,5 +219,59 @@ export default function App() {
         />
       )}
     </AppContext.Provider>
+  );
+}
+
+// Inline info modal (content from InfoButton)
+function InfoModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-[10050] flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+      <div
+        className="bg-background rounded-2xl shadow-xl max-w-lg w-full max-h-[85vh] overflow-y-auto p-6 relative animate-scale-in"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 p-1.5 rounded-full bg-muted text-muted-foreground hover:bg-accent transition-colors"
+        >
+          ✕
+        </button>
+
+        <h2 className="text-2xl font-display text-primary mb-4">🎁 КОРОБОЧКА</h2>
+
+        <div className="space-y-4 text-sm sm:text-base text-foreground/90 leading-relaxed">
+          <section>
+            <h3 className="font-semibold text-base sm:text-lg mb-1">📖 История и цель</h3>
+            <p>
+              КОРОБОЧКА создана по мотивам методики психолога Виолетты Макеевой как инструмент мотивационной гигиены.
+              Это инструмент «лайтовой» самодисциплины, где вы сами определяете содержание и можете сделать паузу в любой момент.
+            </p>
+          </section>
+          <section>
+            <h3 className="font-semibold text-base sm:text-lg mb-1">🗂️ Категории</h3>
+            <ul className="space-y-1 list-none">
+              <li>🟨 <strong>Обязательные дела</strong> — срочные и важные задачи</li>
+              <li>🟦 <strong>Безопасность</strong> — забота о базовых потребностях</li>
+              <li>🟩 <strong>Простые радости</strong> — приятные мелочи</li>
+              <li>🟥 <strong>Эго-радости</strong> — статус и признание</li>
+              <li>🩵 <strong>Доступность простых радостей</strong> — условия для радостей</li>
+            </ul>
+          </section>
+          <section>
+            <h3 className="font-semibold text-base sm:text-lg mb-1">🔄 Как пользоваться</h3>
+            <ol className="list-decimal list-inside space-y-1.5">
+              <li>Добавьте задачи в категории (кнопка «+» на секции или в списке)</li>
+              <li>Нажмите на секцию или «🎲 случайная задача» — получите задачу</li>
+              <li>Работайте по таймеру (время настраивается)</li>
+              <li>Отметьте результат: ✅ Готово или 🔄 Вернуть в коробочку</li>
+              <li>Отслеживайте прогресс в разделе «📊 История»</li>
+            </ol>
+          </section>
+          <p className="text-xs sm:text-sm text-muted-foreground pt-2 border-t border-border">
+            Все данные хранятся только на вашем устройстве. Без регистрации, бесплатно, конфиденциально.
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }

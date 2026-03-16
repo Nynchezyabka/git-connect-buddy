@@ -1,9 +1,16 @@
 import { useState } from "react";
 import {
   Home, List, Archive, BarChart3, Repeat, Download, Upload,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, Info, Bell, BellOff, BellRing,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  isNotificationSupported,
+  getNotificationPermission,
+  requestNotificationPermission,
+  sendNotification,
+} from "@/lib/notifications";
+import { toast } from "sonner";
 
 export type PageId = "home" | "tasks" | "archive" | "history" | "templates";
 
@@ -12,6 +19,7 @@ interface Props {
   onNavigate: (page: PageId) => void;
   onExport: () => void;
   onImport: (file: File) => void;
+  onShowInfo: () => void;
 }
 
 const NAV_ITEMS: { id: PageId; label: string; icon: React.ReactNode }[] = [
@@ -22,7 +30,52 @@ const NAV_ITEMS: { id: PageId; label: string; icon: React.ReactNode }[] = [
   { id: "templates", label: "Шаблоны", icon: <Repeat size={20} /> },
 ];
 
-export function AppSidebar({ currentPage, onNavigate, onExport, onImport }: Props) {
+function NotificationSidebarButton({ expanded }: { expanded: boolean }) {
+  const [permission, setPermission] = useState<NotificationPermission>(
+    getNotificationPermission()
+  );
+
+  if (!isNotificationSupported()) return null;
+
+  const handleClick = async () => {
+    if (permission === "granted") {
+      sendNotification("🎁 КОРОБОЧКА", { body: "Уведомления работают!" });
+      toast.success("Уведомления включены");
+      return;
+    }
+    if (permission === "denied") {
+      toast.error("Уведомления заблокированы в настройках браузера");
+      return;
+    }
+    const granted = await requestNotificationPermission();
+    setPermission(granted ? "granted" : "denied");
+    if (granted) {
+      toast.success("Уведомления включены!");
+      sendNotification("🎁 КОРОБОЧКА", { body: "Теперь вы будете получать напоминания" });
+    } else {
+      toast.error("Разрешение не получено");
+    }
+  };
+
+  const Icon = permission === "granted" ? BellRing : permission === "denied" ? BellOff : Bell;
+  const label = permission === "granted" ? "Уведомления вкл." : permission === "denied" ? "Уведомления выкл." : "Уведомления";
+
+  return (
+    <button
+      onClick={handleClick}
+      title={!expanded ? label : undefined}
+      className={cn(
+        "flex items-center gap-3 rounded-lg transition-all text-sm font-medium text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+        expanded ? "px-3 py-2.5" : "justify-center py-2.5 px-0"
+      )}
+    >
+      <span className="shrink-0"><Icon size={20} /></span>
+      {expanded && <span className="truncate">{label}</span>}
+    </button>
+  );
+}
+
+export function AppSidebar({ currentPage, onNavigate, onExport, onImport, onShowInfo }: Props) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -97,6 +150,24 @@ export function AppSidebar({ currentPage, onNavigate, onExport, onImport }: Prop
             }}
           />
         </label>
+
+        <div className="border-t border-border my-2" />
+
+        {/* Info */}
+        <button
+          onClick={onShowInfo}
+          title={!expanded ? "О приложении" : undefined}
+          className={cn(
+            "flex items-center gap-3 rounded-lg transition-all text-sm font-medium text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+            expanded ? "px-3 py-2.5" : "justify-center py-2.5 px-0"
+          )}
+        >
+          <span className="shrink-0"><Info size={20} /></span>
+          {expanded && <span className="truncate">О приложении</span>}
+        </button>
+
+        {/* Notifications */}
+        <NotificationSidebarButton expanded={expanded} />
       </nav>
     </aside>
   );
