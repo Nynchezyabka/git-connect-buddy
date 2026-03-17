@@ -75,7 +75,7 @@ function NotificationSidebarButton({ expanded }: { expanded: boolean }) {
   );
 }
 
-export function AppSidebar({ currentPage, onNavigate, onExport, onImport, onShowInfo }: Props) {
+export function AppSidebar({ currentPage, onNavigate, onExport, onImport }: Props) {
   const [expanded, setExpanded] = useState(false);
 
   return (
