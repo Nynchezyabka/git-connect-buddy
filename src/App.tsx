@@ -169,6 +169,8 @@ export default function App() {
         return <HistoryModal />;
       case "templates":
         return <TemplatesPanel templates={templates} onSave={saveTemplates} />;
+      case "info":
+        return <InfoPage />;
       default:
         return <Dashboard onRandomTask={handleRandomTask} />;
     }
