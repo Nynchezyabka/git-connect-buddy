@@ -19,7 +19,7 @@ interface Props {
   onNavigate: (page: PageId) => void;
   onExport: () => void;
   onImport: (file: File) => void;
-  onShowInfo: () => void;
+  
 }
 
 const NAV_ITEMS: { id: PageId; label: string; icon: React.ReactNode }[] = [
