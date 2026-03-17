@@ -183,7 +183,6 @@ export default function App() {
         onNavigate={setCurrentPage}
         onExport={handleExport}
         onImport={handleImport}
-        onShowInfo={() => setShowInfo(true)}
       />
 
       <div className="ml-12 transition-all duration-300">
