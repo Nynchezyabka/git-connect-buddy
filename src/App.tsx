@@ -202,10 +202,6 @@ export default function App() {
         </div>
       </div>
 
-      {/* Info modal */}
-      {showInfo && <InfoModal onClose={() => setShowInfo(false)} />}
-
-      {/* Timer (stays modal) */}
       {timerTask && (
         <TimerScreen task={timerTask} onClose={() => setTimerTask(null)} />
       )}
