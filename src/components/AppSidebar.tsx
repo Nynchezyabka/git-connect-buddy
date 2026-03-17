@@ -153,13 +153,16 @@ export function AppSidebar({ currentPage, onNavigate, onExport, onImport }: Prop
 
         <div className="border-t border-border my-2" />
 
-        {/* Info */}
+        {/* Info - as nav item */}
         <button
-          onClick={onShowInfo}
+          onClick={() => onNavigate("info")}
           title={!expanded ? "О приложении" : undefined}
           className={cn(
-            "flex items-center gap-3 rounded-lg transition-all text-sm font-medium text-muted-foreground hover:bg-muted/60 hover:text-foreground",
-            expanded ? "px-3 py-2.5" : "justify-center py-2.5 px-0"
+            "flex items-center gap-3 rounded-lg transition-all text-sm font-medium",
+            expanded ? "px-3 py-2.5" : "justify-center py-2.5 px-0",
+            currentPage === "info"
+              ? "bg-primary/10 text-primary"
+              : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
           )}
         >
           <span className="shrink-0"><Info size={20} /></span>
