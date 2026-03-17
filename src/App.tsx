@@ -35,7 +35,7 @@ export default function App() {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addModalCategory, setAddModalCategory] = useState<CategoryId>(0);
   const [addModalRestrict, setAddModalRestrict] = useState<CategoryId[] | null>(null);
-  const [showInfo, setShowInfo] = useState(false);
+  
 
   // Initialize IndexedDB and load tasks + templates
   useEffect(() => {
