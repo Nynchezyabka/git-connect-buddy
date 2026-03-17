@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Home, List, Archive, BarChart3, Repeat, Download, Upload,
+  Home, List, Archive, CalendarDays, Repeat, Download, Upload,
   ChevronLeft, ChevronRight, Info, Bell, BellOff, BellRing,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
