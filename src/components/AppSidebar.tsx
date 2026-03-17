@@ -12,7 +12,7 @@ import {
 } from "@/lib/notifications";
 import { toast } from "sonner";
 
-export type PageId = "home" | "tasks" | "archive" | "history" | "templates";
+export type PageId = "home" | "tasks" | "archive" | "history" | "templates" | "info";
 
 interface Props {
   currentPage: PageId;
