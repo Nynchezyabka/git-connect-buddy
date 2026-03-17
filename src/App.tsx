@@ -7,7 +7,7 @@ import { TaskListPanel } from "@/components/TaskListPanel";
 import { TimerScreen } from "@/components/TimerScreen";
 import { AddTaskModal } from "@/components/AddTaskModal";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { InfoButton } from "@/components/InfoButton";
+import { InfoPage } from "@/components/InfoPage";
 import { TemplatesPanel } from "@/components/TemplatesPanel";
 import { AppSidebar, PageId } from "@/components/AppSidebar";
 import { HistoryModal } from "@/components/HistoryModal";
