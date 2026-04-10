@@ -454,28 +454,53 @@ function TaskCard({
           </p>
         )}
 
-        <div className="flex items-center gap-0.5 shrink-0">
+        <div className="flex items-center gap-0.5 shrink-0 relative" ref={actionsRef}>
           {!showArchive && !editing && (
             <>
               <button onClick={onStart} className="p-1.5 rounded active:bg-black/10 hover:bg-black/5 transition-colors" title="Таймер">
                 <Play size={14} />
               </button>
-              <button onClick={onComplete} className="p-1.5 rounded active:bg-black/10 hover:bg-black/5 transition-colors" title="Выполнено">
-                <Check size={14} />
+              <button
+                onClick={() => setShowActions(!showActions)}
+                className="p-1.5 rounded active:bg-black/10 hover:bg-black/5 transition-colors"
+                title="Действия"
+              >
+                <MoreVertical size={14} />
               </button>
-              <button onClick={onToggle} className="p-1.5 rounded active:bg-black/10 hover:bg-black/5 transition-colors" title={task.active ? "Скрыть" : "Показать"}>
-                {task.active ? <EyeOff size={14} /> : <Eye size={14} />}
-              </button>
+              {showActions && (
+                <div className="absolute z-[10200] top-full right-0 mt-1 bg-background rounded-md shadow-lg p-1 min-w-[140px] border border-border animate-scale-in">
+                  <button
+                    onClick={() => { onComplete(); setShowActions(false); }}
+                    className="w-full text-left text-xs px-2.5 py-1.5 rounded hover:bg-muted transition-colors flex items-center gap-1.5"
+                  >
+                    <Check size={12} /> Выполнено
+                  </button>
+                  <button
+                    onClick={() => { onToggle(); setShowActions(false); }}
+                    className="w-full text-left text-xs px-2.5 py-1.5 rounded hover:bg-muted transition-colors flex items-center gap-1.5"
+                  >
+                    {task.active ? <><EyeOff size={12} /> Скрыть</> : <><Eye size={12} /> Показать</>}
+                  </button>
+                  <button
+                    onClick={() => { onDelete(); setShowActions(false); }}
+                    className="w-full text-left text-xs px-2.5 py-1.5 rounded hover:bg-muted text-red-600 transition-colors flex items-center gap-1.5"
+                  >
+                    <Trash2 size={12} /> Удалить
+                  </button>
+                </div>
+              )}
             </>
           )}
           {showArchive && (
-            <button onClick={onReturn} className="p-1.5 rounded active:bg-black/10 hover:bg-black/5 transition-colors" title="Вернуть">
-              <Undo2 size={14} />
-            </button>
+            <>
+              <button onClick={onReturn} className="p-1.5 rounded active:bg-black/10 hover:bg-black/5 transition-colors" title="Вернуть">
+                <Undo2 size={14} />
+              </button>
+              <button onClick={onDelete} className="p-1.5 rounded active:bg-black/10 hover:bg-muted transition-colors" title="Удалить">
+                <Trash2 size={14} />
+              </button>
+            </>
           )}
-          <button onClick={onDelete} className="p-1.5 rounded active:bg-black/10 hover:bg-red-100 transition-colors" title="Удалить">
-            <Trash2 size={14} />
-          </button>
         </div>
       </div>
 
