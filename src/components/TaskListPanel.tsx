@@ -5,7 +5,7 @@ import { getCustomSubcategoriesSync, saveCustomSubcategories, getCategoryDisplay
 import { cn } from "@/lib/utils";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import {
-  Play, Eye, EyeOff, Trash2, Check, Undo2, FolderOpen, Plus, Pencil, GripVertical,
+  Play, Eye, EyeOff, Trash2, Check, Undo2, FolderOpen, Plus, Pencil, GripVertical, MoreVertical,
 } from "lucide-react";
 
 interface Props {
@@ -16,7 +16,10 @@ export function TaskListPanel({ showArchive }: Props) {
   const { tasks, setTasks, openTimer, openAddModal } = useApp();
   const [dragId, setDragId] = useState<number | null>(null);
   const [dragOverId, setDragOverId] = useState<number | null>(null);
-  const [collapsedCats, setCollapsedCats] = useState<Set<CategoryId>>(new Set());
+  // #3: Categories collapsed by default
+  const [collapsedCats, setCollapsedCats] = useState<Set<CategoryId>>(
+    () => new Set([0, 1, 2, 3, 4, 5] as CategoryId[])
+  );
   const [collapsedSubs, setCollapsedSubs] = useState<Set<string>>(new Set());
   const [renamingCat, setRenamingCat] = useState<CategoryId | null>(null);
   const [renameCatText, setRenameCatText] = useState("");
@@ -329,12 +332,14 @@ function TaskCard({
   onDragStart, onDragOver, onDrop, onDragEnd,
 }: TaskCardProps) {
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showActions, setShowActions] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editText, setEditText] = useState(task.text);
   const [editingSub, setEditingSub] = useState(false);
   const [addingCustomSub, setAddingCustomSub] = useState(false);
   const [customSubInput, setCustomSubInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const actionsRef = useRef<HTMLDivElement>(null);
 
   const bgMap: Record<CategoryId, string> = {
     0: "bg-cat-0-bg border-l-4 border-l-cat-0",
@@ -449,28 +454,53 @@ function TaskCard({
           </p>
         )}
 
-        <div className="flex items-center gap-0.5 shrink-0">
+        <div className="flex items-center gap-0.5 shrink-0 relative" ref={actionsRef}>
           {!showArchive && !editing && (
             <>
               <button onClick={onStart} className="p-1.5 rounded active:bg-black/10 hover:bg-black/5 transition-colors" title="Таймер">
                 <Play size={14} />
               </button>
-              <button onClick={onComplete} className="p-1.5 rounded active:bg-black/10 hover:bg-black/5 transition-colors" title="Выполнено">
-                <Check size={14} />
+              <button
+                onClick={() => setShowActions(!showActions)}
+                className="p-1.5 rounded active:bg-black/10 hover:bg-black/5 transition-colors"
+                title="Действия"
+              >
+                <MoreVertical size={14} />
               </button>
-              <button onClick={onToggle} className="p-1.5 rounded active:bg-black/10 hover:bg-black/5 transition-colors" title={task.active ? "Скрыть" : "Показать"}>
-                {task.active ? <EyeOff size={14} /> : <Eye size={14} />}
-              </button>
+              {showActions && (
+                <div className="absolute z-[10200] top-full right-0 mt-1 bg-background rounded-md shadow-lg p-1 min-w-[140px] border border-border animate-scale-in">
+                  <button
+                    onClick={() => { onComplete(); setShowActions(false); }}
+                    className="w-full text-left text-xs px-2.5 py-1.5 rounded hover:bg-muted transition-colors flex items-center gap-1.5"
+                  >
+                    <Check size={12} /> Выполнено
+                  </button>
+                  <button
+                    onClick={() => { onToggle(); setShowActions(false); }}
+                    className="w-full text-left text-xs px-2.5 py-1.5 rounded hover:bg-muted transition-colors flex items-center gap-1.5"
+                  >
+                    {task.active ? <><EyeOff size={12} /> Скрыть</> : <><Eye size={12} /> Показать</>}
+                  </button>
+                  <button
+                    onClick={() => { onDelete(); setShowActions(false); }}
+                    className="w-full text-left text-xs px-2.5 py-1.5 rounded hover:bg-muted text-red-600 transition-colors flex items-center gap-1.5"
+                  >
+                    <Trash2 size={12} /> Удалить
+                  </button>
+                </div>
+              )}
             </>
           )}
           {showArchive && (
-            <button onClick={onReturn} className="p-1.5 rounded active:bg-black/10 hover:bg-black/5 transition-colors" title="Вернуть">
-              <Undo2 size={14} />
-            </button>
+            <>
+              <button onClick={onReturn} className="p-1.5 rounded active:bg-black/10 hover:bg-black/5 transition-colors" title="Вернуть">
+                <Undo2 size={14} />
+              </button>
+              <button onClick={onDelete} className="p-1.5 rounded active:bg-black/10 hover:bg-muted transition-colors" title="Удалить">
+                <Trash2 size={14} />
+              </button>
+            </>
           )}
-          <button onClick={onDelete} className="p-1.5 rounded active:bg-black/10 hover:bg-red-100 transition-colors" title="Удалить">
-            <Trash2 size={14} />
-          </button>
         </div>
       </div>
 

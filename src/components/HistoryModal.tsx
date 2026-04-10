@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Task, CATEGORIES, CategoryId } from "@/types";
 import { useApp } from "@/App";
 import { CategoryIcon } from "@/components/CategoryIcon";
-import { ChevronLeft, ChevronRight, Plus, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Clock, Undo2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const MONTH_NAMES = [
@@ -26,7 +26,6 @@ function formatHHMM(date: Date): string {
   return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
 }
 
-// Category colors for sticker backgrounds
 const CAT_COLORS: Record<CategoryId, { bg: string; border: string }> = {
   0: { bg: "bg-[var(--color-cat-0-bg)]", border: "border-[var(--color-cat-0)]" },
   1: { bg: "bg-[var(--color-cat-1-bg)]", border: "border-[var(--color-cat-1)]" },
@@ -52,18 +51,17 @@ export function HistoryModal() {
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [selectedDate, setSelectedDate] = useState<string>(dateKey(today));
 
-  // Manual entry state
   const [manualText, setManualText] = useState("");
   const [manualCategory, setManualCategory] = useState<CategoryId>(1);
   const [manualDuration, setManualDuration] = useState(15);
   const [manualHour, setManualHour] = useState(12);
   const [manualMinute, setManualMinute] = useState(0);
 
-  // Group completed tasks by date
+  // #1: Show tasks that are completed OR have timeSpent > 0
   const tasksByDate = useMemo(() => {
     const map = new Map<string, Task[]>();
     tasks.forEach((t) => {
-      if (t.completed && t.statusChangedAt) {
+      if ((t.completed || (t.timeSpent && t.timeSpent > 0)) && t.statusChangedAt) {
         const d = new Date(t.statusChangedAt);
         const key = dateKey(d);
         if (!map.has(key)) map.set(key, []);
@@ -74,7 +72,6 @@ export function HistoryModal() {
     return map;
   }, [tasks]);
 
-  // Calendar grid
   const calendarDays = useMemo(() => {
     const firstDay = new Date(viewYear, viewMonth, 1);
     const lastDay = new Date(viewYear, viewMonth + 1, 0);
@@ -119,12 +116,23 @@ export function HistoryModal() {
     setManualDuration(15);
   };
 
+  // #6: Remove task from history (uncomplete it, clear timeSpent for that entry)
+  const removeFromHistory = (taskId: number) => {
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === taskId
+          ? { ...t, completed: false, active: true, statusChangedAt: Date.now() }
+          : t
+      )
+    );
+  };
+
   const selParts = selectedDate.split("-").map(Number);
   const selDateStr = `${selParts[2]} ${MONTH_NAMES[selParts[1] - 1]} ${selParts[0]}`;
 
   return (
     <div className="animate-fade-in">
-      <h2 className="font-display text-2xl text-primary mb-4">📊 История и статистика</h2>
+      <h2 className="font-display text-2xl sm:text-3xl text-primary mb-4">📊 История и статистика</h2>
 
       {/* Calendar */}
       <div className="mb-4">
@@ -132,7 +140,7 @@ export function HistoryModal() {
           <button onClick={prevMonth} className="p-1.5 rounded-md hover:bg-muted transition-colors">
             <ChevronLeft size={18} />
           </button>
-          <span className="font-semibold text-sm">
+          <span className="font-semibold text-sm sm:text-base">
             {MONTH_NAMES[viewMonth]} {viewYear}
           </span>
           <button onClick={nextMonth} className="p-1.5 rounded-md hover:bg-muted transition-colors">
@@ -142,7 +150,7 @@ export function HistoryModal() {
 
         <div className="grid grid-cols-7 gap-0.5 text-center">
           {WEEKDAY_HEADERS.map((wd) => (
-            <div key={wd} className="text-xs font-semibold text-muted-foreground py-1">{wd}</div>
+            <div key={wd} className="text-xs sm:text-sm font-semibold text-muted-foreground py-1">{wd}</div>
           ))}
           {calendarDays.map((day, i) => {
             if (day === null) return <div key={`e-${i}`} />;
@@ -155,7 +163,7 @@ export function HistoryModal() {
                 key={key}
                 onClick={() => setSelectedDate(key)}
                 className={cn(
-                  "relative aspect-square flex flex-col items-center justify-center rounded-md text-xs transition-all",
+                  "relative aspect-square flex flex-col items-center justify-center rounded-md text-xs sm:text-sm transition-all",
                   isSelected ? "bg-primary text-primary-foreground font-bold" :
                   isToday ? "bg-accent/30 font-semibold" :
                   "hover:bg-muted/50"
@@ -164,7 +172,7 @@ export function HistoryModal() {
                 {day}
                 {count > 0 && (
                   <span className={cn(
-                    "absolute bottom-0.5 text-[8px] font-bold leading-none",
+                    "absolute bottom-0.5 text-[8px] sm:text-[9px] font-bold leading-none",
                     isSelected ? "text-primary-foreground/80" : "text-primary"
                   )}>
                     {count}
@@ -178,9 +186,9 @@ export function HistoryModal() {
 
       {/* Daily activity */}
       <div className="border-t border-border pt-3">
-        <h3 className="font-display text-lg text-primary">Активность за день</h3>
-        <p className="text-xs text-muted-foreground mb-1">{selDateStr}</p>
-        <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
+        <h3 className="font-display text-lg sm:text-xl text-primary">Активность за день</h3>
+        <p className="text-xs sm:text-sm text-muted-foreground mb-1">{selDateStr}</p>
+        <div className="flex items-center gap-3 text-xs sm:text-sm text-muted-foreground mb-3">
           <span>Задач: <strong className="text-foreground">{selectedTasks.length}</strong></span>
           <span>Время: <strong className="text-foreground">{selectedTotalTime > 0 ? formatTime(selectedTotalTime) : "—"}</strong></span>
         </div>
@@ -192,7 +200,7 @@ export function HistoryModal() {
               const catTasks = selectedTasks.filter((t) => t.category === cat);
               const catTime = catTasks.reduce((s, t) => s + (t.timeSpent ?? 0), 0);
               return (
-                <span key={cat} className={cn("inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full", CAT_COLORS[cat].bg)}>
+                <span key={cat} className={cn("inline-flex items-center gap-1 text-xs sm:text-sm px-2 py-0.5 rounded-full", CAT_COLORS[cat].bg)}>
                   <CategoryIcon category={cat} size={12} />
                   {catTasks.length} · {catTime > 0 ? formatTime(catTime) : "—"}
                 </span>
@@ -213,7 +221,7 @@ export function HistoryModal() {
                 : completedAt;
               const catInfo = CATEGORIES[task.category];
               return (
-                <div key={task.id} className="relative mb-2.5 last:mb-0">
+                <div key={task.id} className="relative mb-2.5 last:mb-0 group">
                   <div className={cn(
                     "absolute -left-3.5 top-2 w-3.5 h-3.5 rounded-full border-2 border-background",
                     DOT_COLORS[task.category]
@@ -224,26 +232,42 @@ export function HistoryModal() {
                     CAT_COLORS[task.category].border
                   )}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-muted-foreground font-mono">
+                      <span className="text-xs sm:text-sm text-muted-foreground font-mono">
                         {formatHHMM(startTime)}
                       </span>
-                      {durationMin > 0 && (
-                        <span className="text-xs text-muted-foreground flex items-center gap-0.5">
-                          <Clock size={11} /> {durationMin}м
-                        </span>
-                      )}
+                      <div className="flex items-center gap-1.5">
+                        {durationMin > 0 && (
+                          <span className="text-xs sm:text-sm text-muted-foreground flex items-center gap-0.5">
+                            <Clock size={11} /> {durationMin}м
+                          </span>
+                        )}
+                        {/* #6: Remove from history button */}
+                        <button
+                          onClick={() => removeFromHistory(task.id)}
+                          className="p-1 rounded opacity-0 group-hover:opacity-60 hover:!opacity-100 active:bg-black/10 transition-all"
+                          title="Убрать из истории"
+                        >
+                          <Undo2 size={12} />
+                        </button>
+                      </div>
                     </div>
-                    <p className="text-sm font-medium leading-snug mb-1.5">{task.text}</p>
+                    <p className="text-sm sm:text-base font-medium leading-snug mb-1.5">
+                      {task.text}
+                      {/* Show if task is not completed but has time */}
+                      {!task.completed && (
+                        <span className="ml-1.5 text-xs opacity-50 italic">（в процессе）</span>
+                      )}
+                    </p>
                     <div className="flex flex-wrap gap-1">
                       <span className={cn(
-                        "text-[10px] px-1.5 py-0.5 rounded font-semibold",
+                        "text-[10px] sm:text-xs px-1.5 py-0.5 rounded font-semibold",
                         DOT_COLORS[task.category], "text-white"
                       )}>
                         {catInfo.name}
                       </span>
                       {task.subcategory && (
                         <span className={cn(
-                          "text-[10px] px-1.5 py-0.5 rounded",
+                          "text-[10px] sm:text-xs px-1.5 py-0.5 rounded",
                           CAT_COLORS[task.category].bg,
                           "border border-current opacity-70"
                         )}>
@@ -257,27 +281,28 @@ export function HistoryModal() {
             })}
           </div>
         ) : (
-          <p className="text-center text-muted-foreground text-sm py-4">
-            Нет завершённых задач за этот день
+          <p className="text-center text-muted-foreground text-sm sm:text-base py-4">
+            Нет записей за этот день
           </p>
         )}
       </div>
 
       {/* Manual task entry */}
       <div className="border-t border-border pt-3">
-        <h4 className="text-xs font-semibold text-muted-foreground mb-2">Добавить задачу вручную</h4>
-        <input
-          type="text"
+        <h4 className="text-xs sm:text-sm font-semibold text-muted-foreground mb-2">Добавить задачу вручную</h4>
+        {/* #7: textarea for mobile-friendly multi-line placeholder */}
+        <textarea
           value={manualText}
           onChange={(e) => setManualText(e.target.value)}
-          placeholder="введите задачу, которую вы делали в этот день"
-          className="w-full rounded-lg border border-border bg-muted/30 px-3 py-2 text-sm placeholder:text-muted-foreground/60 mb-2"
+          placeholder="Введите задачу, которую вы делали в этот день"
+          rows={2}
+          className="w-full rounded-lg border border-border bg-muted/30 px-3 py-2 text-sm sm:text-base placeholder:text-muted-foreground/60 mb-2 resize-none"
         />
         <div className="flex flex-wrap items-center gap-2 mb-2">
           <select
             value={manualCategory}
             onChange={(e) => setManualCategory(Number(e.target.value) as CategoryId)}
-            className="rounded-md border border-border bg-muted/30 px-2 py-1.5 text-xs"
+            className="rounded-md border border-border bg-muted/30 px-2 py-1.5 text-xs sm:text-sm"
           >
             {([1, 2, 3, 4, 5] as CategoryId[]).map((c) => (
               <option key={c} value={c}>{CATEGORIES[c].name}</option>
@@ -290,9 +315,9 @@ export function HistoryModal() {
               max={480}
               value={manualDuration}
               onChange={(e) => setManualDuration(Math.max(1, parseInt(e.target.value) || 1))}
-              className="w-14 rounded-md border border-border bg-muted/30 px-2 py-1.5 text-xs text-center"
+              className="w-14 rounded-md border border-border bg-muted/30 px-2 py-1.5 text-xs sm:text-sm text-center"
             />
-            <span className="text-[10px] text-muted-foreground">мин</span>
+            <span className="text-xs sm:text-sm text-muted-foreground">мин</span>
           </div>
           <div className="flex items-center gap-0.5">
             <input
@@ -301,22 +326,22 @@ export function HistoryModal() {
               max={23}
               value={manualHour}
               onChange={(e) => setManualHour(Math.min(23, Math.max(0, parseInt(e.target.value) || 0)))}
-              className="w-10 rounded-md border border-border bg-muted/30 px-1 py-1.5 text-xs text-center"
+              className="w-10 rounded-md border border-border bg-muted/30 px-1 py-1.5 text-xs sm:text-sm text-center"
             />
-            <span className="text-[10px]">:</span>
+            <span className="text-xs sm:text-sm">:</span>
             <input
               type="number"
               min={0}
               max={59}
               value={manualMinute}
               onChange={(e) => setManualMinute(Math.min(59, Math.max(0, parseInt(e.target.value) || 0)))}
-              className="w-10 rounded-md border border-border bg-muted/30 px-1 py-1.5 text-xs text-center"
+              className="w-10 rounded-md border border-border bg-muted/30 px-1 py-1.5 text-xs sm:text-sm text-center"
             />
           </div>
           <button
             onClick={handleAddManual}
             disabled={!manualText.trim()}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs font-medium disabled:opacity-40 active:scale-95 transition-all"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-md bg-primary text-primary-foreground text-xs sm:text-sm font-medium disabled:opacity-40 active:scale-95 transition-all"
           >
             <Plus size={12} /> Добавить
           </button>
