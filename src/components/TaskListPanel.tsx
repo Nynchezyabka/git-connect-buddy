@@ -16,7 +16,10 @@ export function TaskListPanel({ showArchive }: Props) {
   const { tasks, setTasks, openTimer, openAddModal } = useApp();
   const [dragId, setDragId] = useState<number | null>(null);
   const [dragOverId, setDragOverId] = useState<number | null>(null);
-  const [collapsedCats, setCollapsedCats] = useState<Set<CategoryId>>(new Set());
+  // #3: Categories collapsed by default
+  const [collapsedCats, setCollapsedCats] = useState<Set<CategoryId>>(
+    () => new Set([0, 1, 2, 3, 4, 5] as CategoryId[])
+  );
   const [collapsedSubs, setCollapsedSubs] = useState<Set<string>>(new Set());
   const [renamingCat, setRenamingCat] = useState<CategoryId | null>(null);
   const [renameCatText, setRenameCatText] = useState("");

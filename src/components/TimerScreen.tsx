@@ -9,18 +9,23 @@ interface Props {
   onClose: () => void;
 }
 
+const QUICK_MINUTES = [15, 30, 45];
+
 export function TimerScreen({ task, onClose }: Props) {
   const { setTasks } = useApp();
-  const [minutes, setMinutes] = useState(15);
+  const [minutesInput, setMinutesInput] = useState("15");
   const [timeLeft, setTimeLeft] = useState(15 * 60);
   const [running, setRunning] = useState(false);
   const [finished, setFinished] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [showPresets, setShowPresets] = useState(false);
   const endAtRef = useRef(0);
   const intervalRef = useRef<number | null>(null);
   const bgImage = useRef(getRandomBackgroundForCategory(task.category));
-  const elapsedRef = useRef(0); // total elapsed seconds this session
+  const elapsedRef = useRef(0);
   const sessionStartRef = useRef(0);
+
+  const minutes = Math.max(1, parseInt(minutesInput) || 1);
 
   const updateDisplay = useCallback(() => {
     if (endAtRef.current <= 0) return;
@@ -28,7 +33,6 @@ export function TimerScreen({ task, onClose }: Props) {
     setTimeLeft(remaining);
     if (remaining <= 0) {
       clearInterval(intervalRef.current!);
-      // Track elapsed time
       if (sessionStartRef.current > 0) {
         elapsedRef.current += Math.round((Date.now() - sessionStartRef.current) / 1000);
         sessionStartRef.current = 0;
@@ -47,7 +51,6 @@ export function TimerScreen({ task, onClose }: Props) {
   }, [running, updateDisplay]);
 
   const saveTimeSpent = useCallback(() => {
-    // Add any remaining running time
     let total = elapsedRef.current;
     if (sessionStartRef.current > 0) {
       total += Math.round((Date.now() - sessionStartRef.current) / 1000);
@@ -69,13 +72,13 @@ export function TimerScreen({ task, onClose }: Props) {
     endAtRef.current = Date.now() + total * 1000;
     sessionStartRef.current = Date.now();
     setRunning(true);
+    setShowPresets(false);
   };
 
   const pause = () => {
     if (!running) return;
     clearInterval(intervalRef.current!);
     const remaining = Math.max(0, Math.ceil((endAtRef.current - Date.now()) / 1000));
-    // Track elapsed
     if (sessionStartRef.current > 0) {
       elapsedRef.current += Math.round((Date.now() - sessionStartRef.current) / 1000);
       sessionStartRef.current = 0;
@@ -87,7 +90,6 @@ export function TimerScreen({ task, onClose }: Props) {
 
   const reset = () => {
     clearInterval(intervalRef.current!);
-    // Don't lose already tracked time
     if (sessionStartRef.current > 0) {
       elapsedRef.current += Math.round((Date.now() - sessionStartRef.current) / 1000);
       sessionStartRef.current = 0;
@@ -113,11 +115,16 @@ export function TimerScreen({ task, onClose }: Props) {
     onClose();
   };
 
+  const selectPreset = (m: number) => {
+    setMinutesInput(String(m));
+    if (!running) setTimeLeft(m * 60);
+    setShowPresets(false);
+  };
+
   const mins = Math.floor(timeLeft / 60);
   const secs = timeLeft % 60;
   const info = CATEGORIES[task.category];
 
-  // Show elapsed time
   let currentElapsed = elapsedRef.current;
   if (sessionStartRef.current > 0) {
     currentElapsed += Math.round((Date.now() - sessionStartRef.current) / 1000);
@@ -154,14 +161,12 @@ export function TimerScreen({ task, onClose }: Props) {
         </div>
         <div className="text-sm mb-4 opacity-80 timer-label-glow font-medium">{info.name}</div>
 
-        {/* Elapsed time indicator */}
         {(task.timeSpent ?? 0) > 0 && (
           <div className="text-xs mb-2 opacity-60 flex items-center gap-1 bg-white/40 px-2 py-1 rounded-full">
             ⏱ Ранее: {Math.floor((task.timeSpent ?? 0) / 60)}м
           </div>
         )}
 
-        {/* Timer display */}
         <div className="font-mono text-7xl sm:text-8xl font-bold mb-2 tracking-wider timer-glow">
           {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}
         </div>
@@ -174,22 +179,59 @@ export function TimerScreen({ task, onClose }: Props) {
 
         {!finished && (
           <>
-            {/* Minutes input */}
-            <div className="flex items-center gap-2 mb-4 bg-white/50 px-3 py-2 rounded-lg shadow-sm">
+            {/* Minutes input with presets */}
+            <div className="relative flex items-center gap-2 mb-4 bg-white/50 px-3 py-2 rounded-lg shadow-sm">
               <input
-                type="number"
-                min={1}
-                max={120}
-                value={minutes}
+                type="text"
+                inputMode="numeric"
+                value={minutesInput}
+                onFocus={(e) => {
+                  e.target.select();
+                  setShowPresets(true);
+                }}
+                onBlur={() => {
+                  // Delay to allow preset click
+                  setTimeout(() => setShowPresets(false), 200);
+                  // Normalize on blur
+                  const v = parseInt(minutesInput);
+                  if (!v || v < 1) {
+                    setMinutesInput("1");
+                    if (!running) setTimeLeft(60);
+                  } else {
+                    const clamped = Math.min(120, v);
+                    setMinutesInput(String(clamped));
+                    if (!running) setTimeLeft(clamped * 60);
+                  }
+                }}
                 onChange={(e) => {
-                  const v = Math.max(1, parseInt(e.target.value) || 1);
-                  setMinutes(v);
-                  if (!running) setTimeLeft(v * 60);
+                  const raw = e.target.value.replace(/[^0-9]/g, "");
+                  setMinutesInput(raw);
+                  const v = parseInt(raw);
+                  if (v && v >= 1 && !running) {
+                    setTimeLeft(Math.min(120, v) * 60);
+                  }
                 }}
                 className="w-16 text-center rounded-md border border-border bg-white p-1.5 text-sm font-medium"
                 disabled={running}
               />
               <span className="text-sm font-medium">мин</span>
+
+              {/* Quick presets dropdown */}
+              {showPresets && !running && (
+                <div className="absolute top-full left-0 mt-1 flex gap-1.5 bg-white/90 rounded-lg px-2 py-1.5 shadow-md border border-border/30 z-10">
+                  {QUICK_MINUTES.map((m) => (
+                    <button
+                      key={m}
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => selectPreset(m)}
+                      className="px-3 py-1 rounded-md bg-white/70 hover:bg-primary hover:text-primary-foreground text-sm font-medium transition-colors border border-border/20"
+                    >
+                      {m}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               <button
                 onClick={() => setSoundEnabled(!soundEnabled)}
                 className="ml-2 p-2 rounded-md bg-white/70 active:bg-white/90 border border-border/30"
@@ -220,7 +262,6 @@ export function TimerScreen({ task, onClose }: Props) {
               </button>
             </div>
 
-            {/* Complete now button - muted green */}
             <button
               onClick={completeTask}
               className="flex items-center gap-2 px-6 py-3 rounded-lg bg-emerald-600/80 text-white font-medium active:scale-95 transition-all shadow-md"
