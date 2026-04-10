@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Task, CATEGORIES, CategoryId } from "@/types";
 import { useApp } from "@/App";
 import { CategoryIcon } from "@/components/CategoryIcon";
-import { ChevronLeft, ChevronRight, Plus, Clock, Undo2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Clock, Undo2, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const MONTH_NAMES = [
@@ -116,7 +116,7 @@ export function HistoryModal() {
     setManualDuration(15);
   };
 
-  // #6: Remove task from history (uncomplete it, clear timeSpent for that entry)
+  // Remove from history: return to active tasks
   const removeFromHistory = (taskId: number) => {
     setTasks((prev) =>
       prev.map((t) =>
@@ -125,6 +125,11 @@ export function HistoryModal() {
           : t
       )
     );
+  };
+
+  // Delete task entirely
+  const deleteFromHistory = (taskId: number) => {
+    setTasks((prev) => prev.filter((t) => t.id !== taskId));
   };
 
   const selParts = selectedDate.split("-").map(Number);
@@ -241,13 +246,20 @@ export function HistoryModal() {
                             <Clock size={11} /> {durationMin}м
                           </span>
                         )}
-                        {/* #6: Remove from history button */}
+                        {/* Actions */}
                         <button
                           onClick={() => removeFromHistory(task.id)}
                           className="p-1 rounded opacity-0 group-hover:opacity-60 hover:!opacity-100 active:bg-black/10 transition-all"
-                          title="Убрать из истории"
+                          title="Вернуть в активные"
                         >
                           <Undo2 size={12} />
+                        </button>
+                        <button
+                          onClick={() => deleteFromHistory(task.id)}
+                          className="p-1 rounded opacity-0 group-hover:opacity-60 hover:!opacity-100 active:bg-black/10 transition-all text-red-500"
+                          title="Удалить задачу"
+                        >
+                          <Trash2 size={12} />
                         </button>
                       </div>
                     </div>
