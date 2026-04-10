@@ -340,7 +340,6 @@ function TaskCard({
   const [customSubInput, setCustomSubInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const actionsRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const bgMap: Record<CategoryId, string> = {
     0: "bg-cat-0-bg border-l-4 border-l-cat-0",
