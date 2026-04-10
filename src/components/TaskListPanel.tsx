@@ -5,7 +5,7 @@ import { getCustomSubcategoriesSync, saveCustomSubcategories, getCategoryDisplay
 import { cn } from "@/lib/utils";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import {
-  Play, Eye, EyeOff, Trash2, Check, Undo2, FolderOpen, Plus, Pencil, GripVertical,
+  Play, Eye, EyeOff, Trash2, Check, Undo2, FolderOpen, Plus, Pencil, GripVertical, MoreVertical,
 } from "lucide-react";
 
 interface Props {
@@ -332,11 +332,14 @@ function TaskCard({
   onDragStart, onDragOver, onDrop, onDragEnd,
 }: TaskCardProps) {
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showActions, setShowActions] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editText, setEditText] = useState(task.text);
   const [editingSub, setEditingSub] = useState(false);
   const [addingCustomSub, setAddingCustomSub] = useState(false);
   const [customSubInput, setCustomSubInput] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const actionsRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const bgMap: Record<CategoryId, string> = {
