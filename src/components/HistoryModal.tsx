@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Task, CATEGORIES, CategoryId } from "@/types";
 import { useApp } from "@/App";
 import { CategoryIcon } from "@/components/CategoryIcon";
-import { ChevronLeft, ChevronRight, Plus, Clock, Undo2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Clock, Undo2, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const MONTH_NAMES = [
@@ -116,7 +116,7 @@ export function HistoryModal() {
     setManualDuration(15);
   };
 
-  // #6: Remove task from history (uncomplete it, clear timeSpent for that entry)
+  // Remove from history: return to active tasks
   const removeFromHistory = (taskId: number) => {
     setTasks((prev) =>
       prev.map((t) =>
@@ -125,6 +125,11 @@ export function HistoryModal() {
           : t
       )
     );
+  };
+
+  // Delete task entirely
+  const deleteFromHistory = (taskId: number) => {
+    setTasks((prev) => prev.filter((t) => t.id !== taskId));
   };
 
   const selParts = selectedDate.split("-").map(Number);
