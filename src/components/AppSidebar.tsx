@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Home, List, Archive, CalendarDays, Repeat, Download, Upload,
-  ChevronLeft, ChevronRight, Info, Bell, BellOff, BellRing,
+  ChevronLeft, ChevronRight, Info, Bell, BellOff, BellRing, Type,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -72,6 +72,71 @@ function NotificationSidebarButton({ expanded }: { expanded: boolean }) {
       <span className="shrink-0"><Icon size={20} /></span>
       {expanded && <span className="truncate">{label}</span>}
     </button>
+  );
+}
+
+const FONT_SIZE_KEY = "app_font_scale";
+const FONT_SIZES = [
+  { label: "S", value: 0.9 },
+  { label: "M", value: 1.0 },
+  { label: "L", value: 1.15 },
+  { label: "XL", value: 1.3 },
+];
+
+function applyFontScale(scale: number) {
+  document.documentElement.style.fontSize = `${scale * 100}%`;
+}
+
+function FontSizeControl({ expanded }: { expanded: boolean }) {
+  const [scale, setScale] = useState<number>(() => {
+    const saved = parseFloat(localStorage.getItem(FONT_SIZE_KEY) || "1");
+    return isNaN(saved) ? 1 : saved;
+  });
+
+  useEffect(() => {
+    applyFontScale(scale);
+    localStorage.setItem(FONT_SIZE_KEY, String(scale));
+  }, [scale]);
+
+  if (!expanded) {
+    return (
+      <button
+        onClick={() => {
+          const idx = FONT_SIZES.findIndex((s) => s.value === scale);
+          const next = FONT_SIZES[(idx + 1) % FONT_SIZES.length];
+          setScale(next.value);
+        }}
+        title="Размер шрифта"
+        className="flex items-center justify-center py-2.5 px-0 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-all"
+      >
+        <Type size={20} />
+      </button>
+    );
+  }
+
+  return (
+    <div className="px-3 py-2">
+      <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground mb-1.5">
+        <Type size={14} />
+        <span>Размер шрифта</span>
+      </div>
+      <div className="flex gap-1">
+        {FONT_SIZES.map((s) => (
+          <button
+            key={s.label}
+            onClick={() => setScale(s.value)}
+            className={cn(
+              "flex-1 py-1 rounded-md text-xs font-semibold border transition-all",
+              scale === s.value
+                ? "bg-primary text-primary-foreground border-primary"
+                : "border-border text-muted-foreground hover:bg-muted/60"
+            )}
+          >
+            {s.label}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -171,6 +236,11 @@ export function AppSidebar({ currentPage, onNavigate, onExport, onImport }: Prop
 
         {/* Notifications */}
         <NotificationSidebarButton expanded={expanded} />
+
+        <div className="border-t border-border my-2" />
+
+        {/* Font size */}
+        <FontSizeControl expanded={expanded} />
       </nav>
     </aside>
   );
