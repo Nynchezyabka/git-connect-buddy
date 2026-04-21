@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { SECTIONS, CategoryId } from "@/types";
 import { useApp } from "@/App";
 import { cn } from "@/lib/utils";
-import { Dices, Plus } from "lucide-react";
+import { Dices, Plus, ListChecks } from "lucide-react";
 
 const sectionColors: Record<string, string> = {
   mandatory: "bg-cat-1-bg border-t-[8px] border-t-cat-1",
@@ -41,9 +41,10 @@ function formatRelativeTime(timestamp: number | undefined): string | null {
 
 interface Props {
   onRandomTask: (categories: CategoryId[]) => void;
+  onViewTasks?: () => void;
 }
 
-export function Dashboard({ onRandomTask }: Props) {
+export function Dashboard({ onRandomTask, onViewTasks }: Props) {
   const { tasks, openAddModal } = useApp();
   const [activity, setActivity] = useState<Record<string, number>>(getLastActivity);
 
@@ -99,7 +100,7 @@ export function Dashboard({ onRandomTask }: Props) {
               {relativeTime ? `была ${relativeTime}` : "ещё не открывалась"}
             </div>
 
-            <div className="flex justify-center gap-2 mt-3">
+            <div className="flex justify-center gap-2 mt-3 flex-wrap">
               <button
                 onClick={(e) => { e.stopPropagation(); handleRandomTask(section.sectionClass, section.categories); }}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/50 dark:bg-white/20 text-sm sm:text-xs font-medium active:scale-95 hover:bg-white/70 dark:hover:bg-white/30 transition-all"
@@ -108,8 +109,16 @@ export function Dashboard({ onRandomTask }: Props) {
                 <span>случайная задача</span>
               </button>
               <button
+                onClick={(e) => { e.stopPropagation(); onViewTasks?.(); }}
+                className="flex items-center justify-center w-8 h-8 rounded-md bg-white/50 dark:bg-white/20 active:scale-95 hover:bg-white/70 dark:hover:bg-white/30 transition-all"
+                title="Посмотреть задачи в этой секции"
+              >
+                <ListChecks size={16} />
+              </button>
+              <button
                 onClick={(e) => { e.stopPropagation(); openAddModal(section.categories[0], section.categories); }}
                 className="flex items-center justify-center w-8 h-8 rounded-md bg-white/50 dark:bg-white/20 active:scale-95 hover:bg-white/70 dark:hover:bg-white/30 transition-all"
+                title="Добавить задачу"
               >
                 <Plus size={16} />
               </button>
