@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Task, CATEGORIES } from "@/types";
 import { useApp } from "@/App";
 import { getRandomBackgroundForCategory } from "@/lib/assets";
-import { X, Play, Pause, RotateCcw, Check, Undo2, Volume2, VolumeX } from "lucide-react";
+import { X, Play, Pause, RotateCcw, Check, Undo2, Volume2, VolumeX, Plus } from "lucide-react";
 
 interface Props {
   task: Task;
@@ -12,7 +12,7 @@ interface Props {
 const QUICK_MINUTES = [15, 30, 45];
 
 export function TimerScreen({ task, onClose }: Props) {
-  const { setTasks } = useApp();
+  const { setTasks, openAddModal } = useApp();
   const [minutesInput, setMinutesInput] = useState("15");
   const [timeLeft, setTimeLeft] = useState(15 * 60);
   const [running, setRunning] = useState(false);
@@ -288,6 +288,15 @@ export function TimerScreen({ task, onClose }: Props) {
             </button>
           </div>
         )}
+
+        {/* Quick add task — for sudden ideas */}
+        <button
+          onClick={() => openAddModal()}
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/70 hover:bg-white/90 text-xs font-medium shadow-sm border border-border/30 active:scale-95 transition-all"
+          title="Быстро добавить задачу"
+        >
+          <Plus size={14} /> новая идея
+        </button>
       </div>
     </div>
   );
