@@ -140,7 +140,7 @@ export function HistoryModal() {
       <h2 className="font-display text-2xl sm:text-3xl text-primary mb-4">📊 История и статистика</h2>
 
       {/* Calendar */}
-      <div className="mb-4">
+      <div className="mb-4 sm:max-w-md">
         <div className="flex items-center justify-between mb-2">
           <button onClick={prevMonth} className="p-1.5 rounded-md hover:bg-muted transition-colors">
             <ChevronLeft size={18} />
@@ -153,22 +153,24 @@ export function HistoryModal() {
           </button>
         </div>
 
-        <div className="grid grid-cols-7 gap-0.5 text-center">
+        <div className="grid grid-cols-7 text-center border border-border rounded-md overflow-hidden">
           {WEEKDAY_HEADERS.map((wd) => (
-            <div key={wd} className="text-xs sm:text-sm font-semibold text-muted-foreground py-1">{wd}</div>
+            <div key={wd} className="text-xs sm:text-[11px] font-semibold text-muted-foreground py-1 bg-muted/40 border-b border-border">{wd}</div>
           ))}
           {calendarDays.map((day, i) => {
-            if (day === null) return <div key={`e-${i}`} />;
+            if (day === null) return <div key={`e-${i}`} className="aspect-square sm:aspect-auto sm:h-9 border-r border-b border-border/50 last:border-r-0 bg-muted/10" />;
             const key = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
             const count = tasksByDate.get(key)?.length ?? 0;
             const isSelected = key === selectedDate;
             const isToday = key === dateKey(today);
+            const colIdx = i % 7;
             return (
               <button
                 key={key}
                 onClick={() => setSelectedDate(key)}
                 className={cn(
-                  "relative aspect-square flex flex-col items-center justify-center rounded-md text-xs sm:text-sm transition-all",
+                  "relative aspect-square sm:aspect-auto sm:h-9 flex flex-col items-center justify-center text-xs sm:text-[11px] transition-all border-b border-border/50",
+                  colIdx < 6 && "border-r border-border/50",
                   isSelected ? "bg-primary text-primary-foreground font-bold" :
                   isToday ? "bg-accent/30 font-semibold" :
                   "hover:bg-muted/50"
@@ -265,10 +267,6 @@ export function HistoryModal() {
                     </div>
                     <p className="text-sm sm:text-base font-medium leading-snug mb-1.5">
                       {task.text}
-                      {/* Show if task is not completed but has time */}
-                      {!task.completed && (
-                        <span className="ml-1.5 text-xs opacity-50 italic">（в процессе）</span>
-                      )}
                     </p>
                     <div className="flex flex-wrap gap-1">
                       <span className={cn(
