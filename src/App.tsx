@@ -172,7 +172,7 @@ export default function App() {
       case "info":
         return <InfoPage />;
       default:
-        return <Dashboard onRandomTask={handleRandomTask} />;
+        return <Dashboard onRandomTask={handleRandomTask} onViewTasks={() => setCurrentPage("tasks")} />;
     }
   };
 
