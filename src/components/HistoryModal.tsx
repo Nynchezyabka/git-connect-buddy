@@ -72,6 +72,23 @@ export function HistoryModal() {
     return map;
   }, [tasks]);
 
+  // Scheduled (future) tasks bucketed by date
+  const scheduledByDate = useMemo(() => {
+    const map = new Map<string, Task[]>();
+    tasks.forEach((t) => {
+      if (t.scheduledFor && !t.completed) {
+        const d = new Date(t.scheduledFor);
+        const key = dateKey(d);
+        if (!map.has(key)) map.set(key, []);
+        map.get(key)!.push(t);
+      }
+    });
+    return map;
+  }, [tasks]);
+
+  const todayKey = dateKey(today);
+  const isFutureSelected = selectedDate > todayKey;
+
   const calendarDays = useMemo(() => {
     const firstDay = new Date(viewYear, viewMonth, 1);
     const lastDay = new Date(viewYear, viewMonth + 1, 0);
@@ -98,19 +115,34 @@ export function HistoryModal() {
   const handleAddManual = () => {
     if (!manualText.trim()) return;
     const [year, month, day] = selectedDate.split("-").map(Number);
-    const completedAt = new Date(year, month - 1, day, manualHour, manualMinute).getTime();
+    const isFuture = selectedDate > todayKey;
     setTasks((prev) => {
       const maxId = prev.reduce((m, t) => Math.max(m, t.id), 0);
-      const newTask: Task = {
-        id: maxId + 1,
-        text: manualText.trim(),
-        category: manualCategory,
-        completed: true,
-        active: false,
-        statusChangedAt: completedAt,
-        timeSpent: manualDuration * 60,
-      };
-      return [...prev, newTask];
+      if (isFuture) {
+        const scheduledFor = new Date(year, month - 1, day, manualHour, manualMinute).getTime();
+        const newTask: Task = {
+          id: maxId + 1,
+          text: manualText.trim(),
+          category: manualCategory,
+          completed: false,
+          active: true,
+          statusChangedAt: Date.now(),
+          scheduledFor,
+        };
+        return [...prev, newTask];
+      } else {
+        const completedAt = new Date(year, month - 1, day, manualHour, manualMinute).getTime();
+        const newTask: Task = {
+          id: maxId + 1,
+          text: manualText.trim(),
+          category: manualCategory,
+          completed: true,
+          active: false,
+          statusChangedAt: completedAt,
+          timeSpent: manualDuration * 60,
+        };
+        return [...prev, newTask];
+      }
     });
     setManualText("");
     setManualDuration(15);
