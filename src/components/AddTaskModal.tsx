@@ -7,7 +7,7 @@ import { X, Plus } from "lucide-react";
 interface Props {
   defaultCategory: CategoryId;
   restrictCategories: CategoryId[] | null;
-  onAdd: (text: string, category: CategoryId, subcategory?: string) => void;
+  onAdd: (text: string, category: CategoryId, subcategory?: string, recurrence?: { type: "daily"|"weekly"|"monthly"; hour: number; day?: number }) => void;
   onClose: () => void;
 }
 
