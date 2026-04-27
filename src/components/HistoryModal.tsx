@@ -362,38 +362,33 @@ export function HistoryModal() {
         </div>
       )}
 
-      {/* Manual task entry */}
+      {/* Manual / scheduled task entry */}
       <div className="border-t border-border pt-3">
-        <h4 className="text-xs sm:text-sm font-semibold text-muted-foreground mb-2">Добавить задачу вручную</h4>
-        {/* #7: textarea for mobile-friendly multi-line placeholder */}
+        <h4 className="text-xs sm:text-sm font-semibold text-muted-foreground mb-2">
+          {isFutureSelected ? "Добавить задачу" : "Добавить задачу вручную"}
+        </h4>
         <textarea
           value={manualText}
           onChange={(e) => setManualText(e.target.value)}
-          placeholder="Введите задачу, которую вы делали в этот день"
+          placeholder={isFutureSelected ? "Новая задача" : "Введите задачу, которую вы делали в этот день"}
           rows={2}
           className="w-full rounded-lg border border-border bg-muted/30 px-3 py-2 text-sm sm:text-base placeholder:text-muted-foreground/60 mb-2 resize-none"
         />
         <div className="flex flex-wrap items-center gap-2 mb-2">
-          <select
-            value={manualCategory}
-            onChange={(e) => setManualCategory(Number(e.target.value) as CategoryId)}
-            className="rounded-md border border-border bg-muted/30 px-2 py-1.5 text-xs sm:text-sm"
-          >
-            {([1, 2, 3, 4, 5] as CategoryId[]).map((c) => (
-              <option key={c} value={c}>{CATEGORIES[c].name}</option>
-            ))}
-          </select>
-          <div className="flex items-center gap-1">
-            <input
-              type="number"
-              min={1}
-              max={480}
-              value={manualDuration}
-              onChange={(e) => setManualDuration(Math.max(1, parseInt(e.target.value) || 1))}
-              className="w-14 rounded-md border border-border bg-muted/30 px-2 py-1.5 text-xs sm:text-sm text-center"
-            />
-            <span className="text-xs sm:text-sm text-muted-foreground">мин</span>
-          </div>
+          <StyledCategoryPicker value={manualCategory} onChange={setManualCategory} />
+          {!isFutureSelected && (
+            <div className="flex items-center gap-1">
+              <input
+                type="number"
+                min={1}
+                max={480}
+                value={manualDuration}
+                onChange={(e) => setManualDuration(Math.max(1, parseInt(e.target.value) || 1))}
+                className="w-14 rounded-md border border-border bg-muted/30 px-2 py-1.5 text-xs sm:text-sm text-center"
+              />
+              <span className="text-xs sm:text-sm text-muted-foreground">мин</span>
+            </div>
+          )}
           <div className="flex items-center gap-0.5">
             <input
               type="number"
@@ -422,6 +417,46 @@ export function HistoryModal() {
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function StyledCategoryPicker({ value, onChange }: { value: CategoryId; onChange: (c: CategoryId) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs sm:text-sm font-medium border-l-4 border border-border",
+          CAT_COLORS[value].bg,
+          CAT_COLORS[value].border
+        )}
+      >
+        <CategoryIcon category={value} size={14} />
+        {CATEGORIES[value].name}
+      </button>
+      {open && (
+        <div className="absolute z-[10200] top-full left-0 mt-1 bg-background rounded-md shadow-lg p-1 min-w-[200px] border border-border">
+          {([1, 2, 5, 3, 4] as CategoryId[]).map((c) => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => { onChange(c); setOpen(false); }}
+              className={cn(
+                "w-full text-left text-xs sm:text-sm px-2 py-1.5 rounded flex items-center gap-1.5 border-l-4 mb-0.5",
+                CAT_COLORS[c].bg,
+                CAT_COLORS[c].border,
+                value === c && "ring-1 ring-primary/40"
+              )}
+            >
+              <CategoryIcon category={c} size={14} />
+              {CATEGORIES[c].name}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
