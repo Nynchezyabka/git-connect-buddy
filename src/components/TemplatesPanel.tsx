@@ -183,37 +183,57 @@ function TemplateForm({ initial, onSave, onCancel }: {
         </div>
       )}
 
-      {/* Recurrence */}
-      <div className="flex gap-1 mb-2">
-        {(["daily", "weekly", "monthly"] as RecurrenceType[]).map((r) => (
-          <button
-            key={r}
-            onClick={() => setRecurrence(r)}
-            className={cn(
-              "text-xs px-2.5 py-1 rounded-full border transition-all",
-              recurrence === r ? "border-primary bg-primary/10 font-semibold" : "border-border opacity-70"
-            )}
-          >
-            {RECURRENCE_LABELS[r]}
-          </button>
-        ))}
+      {/* Recurrence — buttons on desktop, select on mobile */}
+      <div className="mb-2">
+        <select
+          value={recurrence}
+          onChange={(e) => setRecurrence(e.target.value as RecurrenceType)}
+          className="sm:hidden w-full text-xs px-2 py-1.5 rounded border border-border bg-background"
+        >
+          {(["daily","weekly","monthly"] as RecurrenceType[]).map((r) => (
+            <option key={r} value={r}>{RECURRENCE_LABELS[r]}</option>
+          ))}
+        </select>
+        <div className="hidden sm:flex gap-1">
+          {(["daily", "weekly", "monthly"] as RecurrenceType[]).map((r) => (
+            <button
+              key={r}
+              onClick={() => setRecurrence(r)}
+              className={cn(
+                "text-xs px-2.5 py-1 rounded-full border transition-all",
+                recurrence === r ? "border-primary bg-primary/10 font-semibold" : "border-border opacity-70"
+              )}
+            >
+              {RECURRENCE_LABELS[r]}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Day selector */}
       {recurrence === "weekly" && (
-        <div className="flex gap-1 mb-2">
-          {WEEKDAYS.map((d, i) => (
-            <button
-              key={i}
-              onClick={() => setRecurrenceDay(i)}
-              className={cn(
-                "text-xs w-8 h-8 rounded-full border transition-all",
-                recurrenceDay === i ? "border-primary bg-primary/10 font-bold" : "border-border opacity-60"
-              )}
-            >
-              {d}
-            </button>
-          ))}
+        <div className="mb-2">
+          <select
+            value={recurrenceDay}
+            onChange={(e) => setRecurrenceDay(parseInt(e.target.value))}
+            className="sm:hidden w-full text-xs px-2 py-1.5 rounded border border-border bg-background"
+          >
+            {WEEKDAYS.map((d, i) => <option key={i} value={i}>{d}</option>)}
+          </select>
+          <div className="hidden sm:flex gap-1">
+            {WEEKDAYS.map((d, i) => (
+              <button
+                key={i}
+                onClick={() => setRecurrenceDay(i)}
+                className={cn(
+                  "text-xs w-8 h-8 rounded-full border transition-all",
+                  recurrenceDay === i ? "border-primary bg-primary/10 font-bold" : "border-border opacity-60"
+                )}
+              >
+                {d}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
