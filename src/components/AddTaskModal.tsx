@@ -189,6 +189,39 @@ export function AddTaskModal({ defaultCategory, restrictCategories, onAdd, onClo
           </div>
         )}
 
+        {/* Recurrence block */}
+        <div className="mt-3 rounded-lg bg-white/40 border border-white/60 p-2.5">
+          <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+            <input type="checkbox" checked={recurEnabled} onChange={(e) => setRecurEnabled(e.target.checked)} />
+            <Repeat size={14} /> Повторять
+          </label>
+          {recurEnabled && (
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <select
+                value={recurType}
+                onChange={(e) => setRecurType(e.target.value as RecurrenceType)}
+                className="text-xs px-2 py-1 rounded border border-border bg-white/70"
+              >
+                {(["daily","weekly","monthly"] as RecurrenceType[]).map((r) => (
+                  <option key={r} value={r}>{RECURRENCE_LABELS[r]}</option>
+                ))}
+              </select>
+              {recurType === "weekly" && (
+                <select value={recurDay} onChange={(e) => setRecurDay(parseInt(e.target.value))} className="text-xs px-2 py-1 rounded border border-border bg-white/70">
+                  {WEEKDAYS.map((w, i) => <option key={i} value={i}>{w}</option>)}
+                </select>
+              )}
+              {recurType === "monthly" && (
+                <input type="number" min={1} max={31} value={recurDay} onChange={(e) => setRecurDay(Math.max(1, Math.min(31, parseInt(e.target.value) || 1)))} className="w-14 text-xs px-2 py-1 rounded border border-border bg-white/70 text-center" />
+              )}
+              <span className="text-xs">в</span>
+              <input type="number" min={0} max={23} value={recurHour} onChange={(e) => setRecurHour(Math.max(0, Math.min(23, parseInt(e.target.value) || 0)))} className="w-12 text-xs px-2 py-1 rounded border border-border bg-white/70 text-center" />
+              <span className="text-xs">:00</span>
+              <span className="text-xs text-foreground/60 basis-full">Шаблон автоматически появится в разделе «Шаблоны».</span>
+            </div>
+          )}
+        </div>
+
         <div className="flex gap-2.5 mt-4">
           <button
             onClick={handleSubmit}
