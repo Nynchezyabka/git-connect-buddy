@@ -193,8 +193,10 @@ export function HistoryModal() {
             if (day === null) return <div key={`e-${i}`} className="aspect-square sm:aspect-auto sm:h-9 border-r border-b border-border/50 last:border-r-0 bg-muted/10" />;
             const key = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
             const count = tasksByDate.get(key)?.length ?? 0;
+            const scheduledCount = scheduledByDate.get(key)?.length ?? 0;
             const isSelected = key === selectedDate;
             const isToday = key === dateKey(today);
+            const isFuture = key > todayKey;
             const colIdx = i % 7;
             return (
               <button
@@ -209,12 +211,20 @@ export function HistoryModal() {
                 )}
               >
                 {day}
-                {count > 0 && (
+                {count > 0 && !isFuture && (
                   <span className={cn(
                     "absolute bottom-0.5 text-[8px] sm:text-[9px] font-bold leading-none",
                     isSelected ? "text-primary-foreground/80" : "text-primary"
                   )}>
                     {count}
+                  </span>
+                )}
+                {scheduledCount > 0 && isFuture && (
+                  <span className={cn(
+                    "absolute bottom-0.5 text-[8px] sm:text-[9px] font-bold leading-none",
+                    isSelected ? "text-primary-foreground/80" : "text-muted-foreground"
+                  )}>
+                    📅{scheduledCount}
                   </span>
                 )}
               </button>
