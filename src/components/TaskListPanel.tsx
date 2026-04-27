@@ -15,7 +15,7 @@ interface Props {
 }
 
 export function TaskListPanel({ showArchive, restrictCategories, onClearFilter }: Props) {
-  const { tasks, setTasks, openTimer, openAddModal } = useApp();
+  const { tasks, setTasks, openTimer, openAddModal, completeTaskWithRecurrence } = useApp();
   const [dragId, setDragId] = useState<number | null>(null);
   const [dragOverId, setDragOverId] = useState<number | null>(null);
   // #3: Categories collapsed by default
@@ -55,11 +55,7 @@ export function TaskListPanel({ showArchive, restrictCategories, onClearFilter }
   };
 
   const completeTask = (id: number) => {
-    setTasks((prev) =>
-      prev.map((t) =>
-        t.id === id ? { ...t, completed: true, statusChangedAt: Date.now() } : t
-      )
-    );
+    completeTaskWithRecurrence(id);
   };
 
   const returnTask = (id: number) => {
@@ -161,11 +157,24 @@ export function TaskListPanel({ showArchive, restrictCategories, onClearFilter }
     setRenamingSub(null);
   };
 
+  const filterLabel = restrictCategories && restrictCategories.length > 0
+    ? restrictCategories.map((c) => getCategoryDisplayName(c)).join(", ")
+    : null;
+
   return (
     <div className="animate-fade-in">
       <h2 className="font-display text-2xl text-primary mb-3">
         {showArchive ? "✅ Выполненные" : "📋 Все задачи"}
       </h2>
+
+      {filterLabel && (
+        <div className="mb-3 inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs sm:text-sm">
+          <span>Секция: <strong>{filterLabel}</strong></span>
+          <button onClick={onClearFilter} className="p-0.5 rounded hover:bg-primary/15" title="Сбросить">
+            <Plus size={12} className="rotate-45" />
+          </button>
+        </div>
+      )}
 
       {categoryOrder.length === 0 && (
         <p className="text-center text-muted-foreground py-8 animate-fade-in">
