@@ -1,8 +1,57 @@
-import { Task, TaskTemplate, CategoryId } from "@/types";
+import { Task, TaskTemplate } from "@/types";
 
 /**
- * Check recurring templates and create tasks that are due.
- * Returns new tasks (without IDs) and updated templates if any were processed.
+ * Compute next occurrence timestamp for a template, strictly after `from`.
+ */
+export function nextOccurrence(tpl: TaskTemplate, from: Date = new Date()): number {
+  const candidate = new Date(from);
+  candidate.setSeconds(0, 0);
+  candidate.setMinutes(0);
+  candidate.setHours(tpl.recurrenceHour);
+
+  // advance by 1 day until we satisfy the rule and are strictly after `from`
+  for (let i = 0; i < 366; i++) {
+    if (candidate.getTime() > from.getTime()) {
+      switch (tpl.recurrence) {
+        case "daily":
+          return candidate.getTime();
+        case "weekly":
+          if (tpl.recurrenceDay === undefined || candidate.getDay() === tpl.recurrenceDay) {
+            return candidate.getTime();
+          }
+          break;
+        case "monthly":
+          if (tpl.recurrenceDay === undefined || candidate.getDate() === tpl.recurrenceDay) {
+            return candidate.getTime();
+          }
+          break;
+      }
+    }
+    candidate.setDate(candidate.getDate() + 1);
+  }
+  return candidate.getTime();
+}
+
+/**
+ * Create the next pending instance of a template (called when current instance is completed).
+ */
+export function createNextInstance(tpl: TaskTemplate, from: Date = new Date()): Omit<Task, "id"> {
+  const next = nextOccurrence(tpl, from);
+  return {
+    text: tpl.text,
+    category: tpl.category,
+    subcategory: tpl.subcategory,
+    completed: false,
+    active: true,
+    statusChangedAt: Date.now(),
+    templateId: tpl.id,
+    scheduledFor: next,
+  };
+}
+
+/**
+ * Safety net: if the app wasn't open for several days, ensure each active template
+ * has at least one pending (non-completed) task. Also handles initial seeding.
  */
 export function processRecurringTemplates(
   templates: TaskTemplate[],
@@ -10,49 +59,21 @@ export function processRecurringTemplates(
 ): { newTasks: Omit<Task, "id">[]; updatedTemplates: TaskTemplate[] | null } {
   const now = new Date();
   const today = toDateStr(now);
-  const currentHour = now.getHours();
-  const currentDay = now.getDay(); // 0-6
-  const currentDate = now.getDate(); // 1-31
 
   const newTasks: Omit<Task, "id">[] = [];
   let changed = false;
+
   const updated = templates.map((tpl) => {
     if (!tpl.active) return tpl;
-    if (tpl.lastCreated === today) return tpl; // Already created today
-    if (currentHour < tpl.recurrenceHour) return tpl; // Not time yet
 
-    let shouldCreate = false;
-
-    switch (tpl.recurrence) {
-      case "daily":
-        shouldCreate = true;
-        break;
-      case "weekly":
-        shouldCreate = tpl.recurrenceDay === undefined || tpl.recurrenceDay === currentDay;
-        break;
-      case "monthly":
-        shouldCreate = tpl.recurrenceDay === undefined || tpl.recurrenceDay === currentDate;
-        break;
-    }
-
-    if (!shouldCreate) return tpl;
-
-    // Check if a task with same text+template was already created today
-    const alreadyExists = existingTasks.some(
-      (t) => t.templateId === tpl.id && t.statusChangedAt > startOfDay(now).getTime()
+    // If a pending (uncompleted) instance for this template already exists — skip
+    const hasPending = existingTasks.some(
+      (t) => t.templateId === tpl.id && !t.completed
     );
-    if (alreadyExists) return tpl;
+    if (hasPending) return tpl;
 
-    newTasks.push({
-      text: tpl.text,
-      category: tpl.category,
-      subcategory: tpl.subcategory,
-      completed: false,
-      active: true,
-      statusChangedAt: Date.now(),
-      templateId: tpl.id,
-    });
-
+    // Otherwise create the next instance
+    newTasks.push(createNextInstance(tpl, now));
     changed = true;
     return { ...tpl, lastCreated: today };
   });
@@ -65,10 +86,4 @@ export function processRecurringTemplates(
 
 function toDateStr(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-function startOfDay(d: Date): Date {
-  const s = new Date(d);
-  s.setHours(0, 0, 0, 0);
-  return s;
 }

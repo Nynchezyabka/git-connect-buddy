@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect } from "react";
-import { CategoryId, CATEGORIES, DEFAULT_SUBCATEGORIES } from "@/types";
+import { CategoryId, CATEGORIES, DEFAULT_SUBCATEGORIES, RecurrenceType, RECURRENCE_LABELS, WEEKDAYS } from "@/types";
 import { getCustomSubcategoriesSync, saveCustomSubcategories } from "@/lib/taskStore";
 import { cn } from "@/lib/utils";
-import { X, Plus } from "lucide-react";
+import { X, Plus, Repeat } from "lucide-react";
 
 interface Props {
   defaultCategory: CategoryId;
   restrictCategories: CategoryId[] | null;
-  onAdd: (text: string, category: CategoryId, subcategory?: string) => void;
+  onAdd: (text: string, category: CategoryId, subcategory?: string, recurrence?: { type: "daily"|"weekly"|"monthly"; hour: number; day?: number }) => void;
   onClose: () => void;
 }
 
@@ -18,6 +18,10 @@ export function AddTaskModal({ defaultCategory, restrictCategories, onAdd, onClo
   const [customSubInput, setCustomSubInput] = useState("");
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customSubs, setCustomSubs] = useState(() => getCustomSubcategoriesSync());
+  const [recurEnabled, setRecurEnabled] = useState(false);
+  const [recurType, setRecurType] = useState<RecurrenceType>("daily");
+  const [recurHour, setRecurHour] = useState(9);
+  const [recurDay, setRecurDay] = useState(1);
   const textRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -73,7 +77,10 @@ export function AddTaskModal({ defaultCategory, restrictCategories, onAdd, onClo
 
   const handleSubmit = () => {
     if (!text.trim()) return;
-    onAdd(text, category, subcategory || undefined);
+    const recurrence = recurEnabled
+      ? { type: recurType, hour: recurHour, day: recurType === "daily" ? undefined : recurDay }
+      : undefined;
+    onAdd(text, category, subcategory || undefined, recurrence);
     setText("");
     textRef.current?.focus();
   };
@@ -181,6 +188,39 @@ export function AddTaskModal({ defaultCategory, restrictCategories, onAdd, onClo
             </div>
           </div>
         )}
+
+        {/* Recurrence block */}
+        <div className="mt-3 rounded-lg bg-white/40 border border-white/60 p-2.5">
+          <label className="flex items-center gap-2 text-sm font-medium cursor-pointer">
+            <input type="checkbox" checked={recurEnabled} onChange={(e) => setRecurEnabled(e.target.checked)} />
+            <Repeat size={14} /> Повторять
+          </label>
+          {recurEnabled && (
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <select
+                value={recurType}
+                onChange={(e) => setRecurType(e.target.value as RecurrenceType)}
+                className="text-xs px-2 py-1 rounded border border-border bg-white/70"
+              >
+                {(["daily","weekly","monthly"] as RecurrenceType[]).map((r) => (
+                  <option key={r} value={r}>{RECURRENCE_LABELS[r]}</option>
+                ))}
+              </select>
+              {recurType === "weekly" && (
+                <select value={recurDay} onChange={(e) => setRecurDay(parseInt(e.target.value))} className="text-xs px-2 py-1 rounded border border-border bg-white/70">
+                  {WEEKDAYS.map((w, i) => <option key={i} value={i}>{w}</option>)}
+                </select>
+              )}
+              {recurType === "monthly" && (
+                <input type="number" min={1} max={31} value={recurDay} onChange={(e) => setRecurDay(Math.max(1, Math.min(31, parseInt(e.target.value) || 1)))} className="w-14 text-xs px-2 py-1 rounded border border-border bg-white/70 text-center" />
+              )}
+              <span className="text-xs">в</span>
+              <input type="number" min={0} max={23} value={recurHour} onChange={(e) => setRecurHour(Math.max(0, Math.min(23, parseInt(e.target.value) || 0)))} className="w-12 text-xs px-2 py-1 rounded border border-border bg-white/70 text-center" />
+              <span className="text-xs">:00</span>
+              <span className="text-xs text-foreground/60 basis-full">Шаблон автоматически появится в разделе «Шаблоны».</span>
+            </div>
+          )}
+        </div>
 
         <div className="flex gap-2.5 mt-4">
           <button

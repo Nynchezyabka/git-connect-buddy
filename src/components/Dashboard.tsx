@@ -41,7 +41,7 @@ function formatRelativeTime(timestamp: number | undefined): string | null {
 
 interface Props {
   onRandomTask: (categories: CategoryId[]) => void;
-  onViewTasks?: () => void;
+  onViewTasks?: (categories?: CategoryId[]) => void;
 }
 
 export function Dashboard({ onRandomTask, onViewTasks }: Props) {
@@ -109,7 +109,7 @@ export function Dashboard({ onRandomTask, onViewTasks }: Props) {
                 <span>случайная задача</span>
               </button>
               <button
-                onClick={(e) => { e.stopPropagation(); onViewTasks?.(); }}
+                onClick={(e) => { e.stopPropagation(); onViewTasks?.(section.categories); }}
                 className="flex items-center justify-center w-8 h-8 rounded-md bg-white/50 dark:bg-white/20 active:scale-95 hover:bg-white/70 dark:hover:bg-white/30 transition-all"
                 title="Посмотреть задачи в этой секции"
               >

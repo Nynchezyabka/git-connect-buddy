@@ -10,10 +10,12 @@ import {
 
 interface Props {
   showArchive: boolean;
+  restrictCategories?: CategoryId[] | null;
+  onClearFilter?: () => void;
 }
 
-export function TaskListPanel({ showArchive }: Props) {
-  const { tasks, setTasks, openTimer, openAddModal } = useApp();
+export function TaskListPanel({ showArchive, restrictCategories, onClearFilter }: Props) {
+  const { tasks, setTasks, openTimer, openAddModal, completeTaskWithRecurrence } = useApp();
   const [dragId, setDragId] = useState<number | null>(null);
   const [dragOverId, setDragOverId] = useState<number | null>(null);
   // #3: Categories collapsed by default
@@ -26,7 +28,9 @@ export function TaskListPanel({ showArchive }: Props) {
   const [renamingSub, setRenamingSub] = useState<{ cat: CategoryId; sub: string } | null>(null);
   const [renameSubText, setRenameSubText] = useState("");
 
-  const source = tasks.filter((t) => (showArchive ? t.completed : !t.completed));
+  const source = tasks
+    .filter((t) => (showArchive ? t.completed : !t.completed))
+    .filter((t) => !restrictCategories || restrictCategories.includes(t.category));
 
   // Group by category
   const groups = new Map<CategoryId, Task[]>();
@@ -51,11 +55,7 @@ export function TaskListPanel({ showArchive }: Props) {
   };
 
   const completeTask = (id: number) => {
-    setTasks((prev) =>
-      prev.map((t) =>
-        t.id === id ? { ...t, completed: true, statusChangedAt: Date.now() } : t
-      )
-    );
+    completeTaskWithRecurrence(id);
   };
 
   const returnTask = (id: number) => {
@@ -157,11 +157,24 @@ export function TaskListPanel({ showArchive }: Props) {
     setRenamingSub(null);
   };
 
+  const filterLabel = restrictCategories && restrictCategories.length > 0
+    ? restrictCategories.map((c) => getCategoryDisplayName(c)).join(", ")
+    : null;
+
   return (
     <div className="animate-fade-in">
       <h2 className="font-display text-2xl text-primary mb-3">
         {showArchive ? "✅ Выполненные" : "📋 Все задачи"}
       </h2>
+
+      {filterLabel && (
+        <div className="mb-3 inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs sm:text-sm">
+          <span>Секция: <strong>{filterLabel}</strong></span>
+          <button onClick={onClearFilter} className="p-0.5 rounded hover:bg-primary/15" title="Сбросить">
+            <Plus size={12} className="rotate-45" />
+          </button>
+        </div>
+      )}
 
       {categoryOrder.length === 0 && (
         <p className="text-center text-muted-foreground py-8 animate-fade-in">
@@ -450,6 +463,13 @@ function TaskCard({
               >
                 +подкат.
               </button>
+            )}
+            {task.scheduledFor && task.scheduledFor > Date.now() && (
+              <span className="ml-1.5 text-[11px] sm:text-xs px-1.5 py-0.5 rounded-full bg-primary/10 text-primary inline-flex items-center gap-1 align-middle">
+                📅 {new Date(task.scheduledFor).toLocaleDateString("ru-RU", { day: "numeric", month: "short" })}
+                {" "}
+                {new Date(task.scheduledFor).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
+              </span>
             )}
           </p>
         )}

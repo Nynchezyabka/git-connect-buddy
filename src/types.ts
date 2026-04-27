@@ -10,6 +10,8 @@ export interface Task {
   timeSpent?: number;
   /** Recurring template reference */
   templateId?: number;
+  /** Scheduled (planned) timestamp — task is for the future */
+  scheduledFor?: number;
 }
 
 export type CategoryId = 0 | 1 | 2 | 3 | 4 | 5;
