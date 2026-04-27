@@ -10,9 +10,11 @@ import {
 
 interface Props {
   showArchive: boolean;
+  restrictCategories?: CategoryId[] | null;
+  onClearFilter?: () => void;
 }
 
-export function TaskListPanel({ showArchive }: Props) {
+export function TaskListPanel({ showArchive, restrictCategories, onClearFilter }: Props) {
   const { tasks, setTasks, openTimer, openAddModal } = useApp();
   const [dragId, setDragId] = useState<number | null>(null);
   const [dragOverId, setDragOverId] = useState<number | null>(null);
@@ -26,7 +28,9 @@ export function TaskListPanel({ showArchive }: Props) {
   const [renamingSub, setRenamingSub] = useState<{ cat: CategoryId; sub: string } | null>(null);
   const [renameSubText, setRenameSubText] = useState("");
 
-  const source = tasks.filter((t) => (showArchive ? t.completed : !t.completed));
+  const source = tasks
+    .filter((t) => (showArchive ? t.completed : !t.completed))
+    .filter((t) => !restrictCategories || restrictCategories.includes(t.category));
 
   // Group by category
   const groups = new Map<CategoryId, Task[]>();
