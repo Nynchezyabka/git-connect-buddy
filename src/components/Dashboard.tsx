@@ -41,7 +41,7 @@ function formatRelativeTime(timestamp: number | undefined): string | null {
 
 interface Props {
   onRandomTask: (categories: CategoryId[]) => void;
-  onViewTasks?: () => void;
+  onViewTasks?: (categories?: CategoryId[]) => void;
 }
 
 export function Dashboard({ onRandomTask, onViewTasks }: Props) {
