@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { CategoryId, CATEGORIES, DEFAULT_SUBCATEGORIES } from "@/types";
+import { CategoryId, CATEGORIES, DEFAULT_SUBCATEGORIES, RecurrenceType, RECURRENCE_LABELS, WEEKDAYS } from "@/types";
 import { getCustomSubcategoriesSync, saveCustomSubcategories } from "@/lib/taskStore";
 import { cn } from "@/lib/utils";
-import { X, Plus } from "lucide-react";
+import { X, Plus, Repeat } from "lucide-react";
 
 interface Props {
   defaultCategory: CategoryId;
@@ -18,6 +18,10 @@ export function AddTaskModal({ defaultCategory, restrictCategories, onAdd, onClo
   const [customSubInput, setCustomSubInput] = useState("");
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customSubs, setCustomSubs] = useState(() => getCustomSubcategoriesSync());
+  const [recurEnabled, setRecurEnabled] = useState(false);
+  const [recurType, setRecurType] = useState<RecurrenceType>("daily");
+  const [recurHour, setRecurHour] = useState(9);
+  const [recurDay, setRecurDay] = useState(1);
   const textRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -73,7 +77,10 @@ export function AddTaskModal({ defaultCategory, restrictCategories, onAdd, onClo
 
   const handleSubmit = () => {
     if (!text.trim()) return;
-    onAdd(text, category, subcategory || undefined);
+    const recurrence = recurEnabled
+      ? { type: recurType, hour: recurHour, day: recurType === "daily" ? undefined : recurDay }
+      : undefined;
+    onAdd(text, category, subcategory || undefined, recurrence);
     setText("");
     textRef.current?.focus();
   };
