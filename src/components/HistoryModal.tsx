@@ -233,111 +233,134 @@ export function HistoryModal() {
         </div>
       </div>
 
-      {/* Daily activity */}
-      <div className="border-t border-border pt-3">
-        <h3 className="font-display text-lg sm:text-xl text-primary">Активность за день</h3>
-        <p className="text-xs sm:text-sm text-muted-foreground mb-1">{selDateStr}</p>
-        <div className="flex items-center gap-3 text-xs sm:text-sm text-muted-foreground mb-3">
-          <span>Задач: <strong className="text-foreground">{selectedTasks.length}</strong></span>
-          <span>Время: <strong className="text-foreground">{selectedTotalTime > 0 ? formatTime(selectedTotalTime) : "—"}</strong></span>
-        </div>
-
-        {/* Category breakdown */}
-        {selectedTasks.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-3">
-            {Array.from(new Set(selectedTasks.map((t) => t.category))).map((cat) => {
-              const catTasks = selectedTasks.filter((t) => t.category === cat);
-              const catTime = catTasks.reduce((s, t) => s + (t.timeSpent ?? 0), 0);
-              return (
-                <span key={cat} className={cn("inline-flex items-center gap-1 text-xs sm:text-sm px-2 py-0.5 rounded-full", CAT_COLORS[cat].bg)}>
-                  <CategoryIcon category={cat} size={12} />
-                  {catTasks.length} · {catTime > 0 ? formatTime(catTime) : "—"}
-                </span>
-              );
-            })}
+      {/* Daily activity (past/today only) */}
+      {!isFutureSelected && (
+        <div className="border-t border-border pt-3">
+          <h3 className="font-display text-lg sm:text-xl text-primary">Активность за день</h3>
+          <p className="text-xs sm:text-sm text-muted-foreground mb-1">{selDateStr}</p>
+          <div className="flex items-center gap-3 text-xs sm:text-sm text-muted-foreground mb-3">
+            <span>Задач: <strong className="text-foreground">{selectedTasks.length}</strong></span>
+            <span>Время: <strong className="text-foreground">{selectedTotalTime > 0 ? formatTime(selectedTotalTime) : "—"}</strong></span>
           </div>
-        )}
 
-        {/* Timeline stickers */}
-        {selectedTasks.length > 0 ? (
-          <div className="relative pl-5 mb-4">
-            <div className="absolute left-2 top-0 bottom-0 w-1 bg-border rounded-full" />
-            {selectedTasks.map((task) => {
-              const completedAt = new Date(task.statusChangedAt);
-              const durationMin = Math.round((task.timeSpent ?? 0) / 60);
-              const startTime = task.timeSpent
-                ? new Date(task.statusChangedAt - (task.timeSpent * 1000))
-                : completedAt;
-              const catInfo = CATEGORIES[task.category];
-              return (
-                <div key={task.id} className="relative mb-2.5 last:mb-0 group">
-                  <div className={cn(
-                    "absolute -left-3.5 top-2 w-3.5 h-3.5 rounded-full border-2 border-background",
-                    DOT_COLORS[task.category]
-                  )} />
-                  <div className={cn(
-                    "rounded-lg p-3 border-l-4",
-                    CAT_COLORS[task.category].bg,
-                    CAT_COLORS[task.category].border
-                  )}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs sm:text-sm text-muted-foreground font-mono">
-                        {formatHHMM(startTime)}
-                      </span>
-                      <div className="flex items-center gap-1.5">
-                        {durationMin > 0 && (
-                          <span className="text-xs sm:text-sm text-muted-foreground flex items-center gap-0.5">
-                            <Clock size={11} /> {durationMin}м
+          {/* Category breakdown */}
+          {selectedTasks.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {Array.from(new Set(selectedTasks.map((t) => t.category))).map((cat) => {
+                const catTasks = selectedTasks.filter((t) => t.category === cat);
+                const catTime = catTasks.reduce((s, t) => s + (t.timeSpent ?? 0), 0);
+                return (
+                  <span key={cat} className={cn("inline-flex items-center gap-1 text-xs sm:text-sm px-2 py-0.5 rounded-full", CAT_COLORS[cat].bg)}>
+                    <CategoryIcon category={cat} size={12} />
+                    {catTasks.length} · {catTime > 0 ? formatTime(catTime) : "—"}
+                  </span>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Timeline stickers */}
+          {selectedTasks.length > 0 ? (
+            <div className="relative pl-5 mb-4">
+              <div className="absolute left-2 top-0 bottom-0 w-1 bg-border rounded-full" />
+              {selectedTasks.map((task) => {
+                const completedAt = new Date(task.statusChangedAt);
+                const durationMin = Math.round((task.timeSpent ?? 0) / 60);
+                const startTime = task.timeSpent
+                  ? new Date(task.statusChangedAt - (task.timeSpent * 1000))
+                  : completedAt;
+                const catInfo = CATEGORIES[task.category];
+                return (
+                  <div key={task.id} className="relative mb-2.5 last:mb-0 group">
+                    <div className={cn(
+                      "absolute -left-3.5 top-2 w-3.5 h-3.5 rounded-full border-2 border-background",
+                      DOT_COLORS[task.category]
+                    )} />
+                    <div className={cn(
+                      "rounded-lg p-3 border-l-4",
+                      CAT_COLORS[task.category].bg,
+                      CAT_COLORS[task.category].border
+                    )}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs sm:text-sm text-muted-foreground font-mono">
+                          {formatHHMM(startTime)}
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                          {durationMin > 0 && (
+                            <span className="text-xs sm:text-sm text-muted-foreground flex items-center gap-0.5">
+                              <Clock size={11} /> {durationMin}м
+                            </span>
+                          )}
+                          <button
+                            onClick={() => removeFromHistory(task.id)}
+                            className="p-1 rounded opacity-0 group-hover:opacity-60 hover:!opacity-100 active:bg-black/10 transition-all"
+                            title="Вернуть в активные"
+                          >
+                            <Undo2 size={12} />
+                          </button>
+                          <button
+                            onClick={() => deleteFromHistory(task.id)}
+                            className="p-1 rounded opacity-0 group-hover:opacity-60 hover:!opacity-100 active:bg-black/10 transition-all text-red-500"
+                            title="Удалить задачу"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </div>
+                      <p className="text-sm sm:text-base font-medium leading-snug mb-1.5">
+                        {task.text}
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        <span className={cn(
+                          "text-[10px] sm:text-xs px-1.5 py-0.5 rounded font-semibold",
+                          DOT_COLORS[task.category], "text-white"
+                        )}>
+                          {catInfo.name}
+                        </span>
+                        {task.subcategory && (
+                          <span className={cn(
+                            "text-[10px] sm:text-xs px-1.5 py-0.5 rounded",
+                            CAT_COLORS[task.category].bg,
+                            "border border-current opacity-70"
+                          )}>
+                            {task.subcategory}
                           </span>
                         )}
-                        {/* Actions */}
-                        <button
-                          onClick={() => removeFromHistory(task.id)}
-                          className="p-1 rounded opacity-0 group-hover:opacity-60 hover:!opacity-100 active:bg-black/10 transition-all"
-                          title="Вернуть в активные"
-                        >
-                          <Undo2 size={12} />
-                        </button>
-                        <button
-                          onClick={() => deleteFromHistory(task.id)}
-                          className="p-1 rounded opacity-0 group-hover:opacity-60 hover:!opacity-100 active:bg-black/10 transition-all text-red-500"
-                          title="Удалить задачу"
-                        >
-                          <Trash2 size={12} />
-                        </button>
                       </div>
                     </div>
-                    <p className="text-sm sm:text-base font-medium leading-snug mb-1.5">
-                      {task.text}
-                    </p>
-                    <div className="flex flex-wrap gap-1">
-                      <span className={cn(
-                        "text-[10px] sm:text-xs px-1.5 py-0.5 rounded font-semibold",
-                        DOT_COLORS[task.category], "text-white"
-                      )}>
-                        {catInfo.name}
-                      </span>
-                      {task.subcategory && (
-                        <span className={cn(
-                          "text-[10px] sm:text-xs px-1.5 py-0.5 rounded",
-                          CAT_COLORS[task.category].bg,
-                          "border border-current opacity-70"
-                        )}>
-                          {task.subcategory}
-                        </span>
-                      )}
-                    </div>
                   </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-center text-muted-foreground text-sm sm:text-base py-4">
+              Нет записей за этот день
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Future-day scheduled list */}
+      {isFutureSelected && (
+        <div className="border-t border-border pt-3">
+          <h3 className="font-display text-lg sm:text-xl text-primary">📅 Запланировано</h3>
+          <p className="text-xs sm:text-sm text-muted-foreground mb-3">{selDateStr}</p>
+          {(scheduledByDate.get(selectedDate) ?? []).length === 0 ? (
+            <p className="text-center text-muted-foreground text-sm py-3">Пока ничего не запланировано</p>
+          ) : (
+            <div className="flex flex-col gap-2 mb-3">
+              {(scheduledByDate.get(selectedDate) ?? []).map((task) => (
+                <div key={task.id} className={cn("rounded-lg p-2.5 border-l-4 group flex items-center gap-2", CAT_COLORS[task.category].bg, CAT_COLORS[task.category].border)}>
+                  <CategoryIcon category={task.category} size={14} />
+                  <span className="text-xs font-mono text-muted-foreground">{formatHHMM(new Date(task.scheduledFor!))}</span>
+                  <span className="text-sm font-medium flex-1 truncate">{task.text}</span>
+                  <button onClick={() => deleteFromHistory(task.id)} className="p-1 rounded opacity-0 group-hover:opacity-60 hover:!opacity-100 text-red-500" title="Удалить"><Trash2 size={12} /></button>
                 </div>
-              );
-            })}
-          </div>
-        ) : (
-          <p className="text-center text-muted-foreground text-sm sm:text-base py-4">
-            Нет записей за этот день
-          </p>
-        )}
-      </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Manual task entry */}
       <div className="border-t border-border pt-3">
