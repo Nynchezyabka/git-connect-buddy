@@ -30,48 +30,114 @@ const NAV_ITEMS: { id: PageId; label: string; icon: React.ReactNode }[] = [
   { id: "templates", label: "Шаблоны", icon: <Repeat size={20} /> },
 ];
 
+const REMINDERS_KEY = "daily_reminders";
+
+interface DailyReminders { enabled: boolean; times: string[] }
+
+function loadReminders(): DailyReminders {
+  try {
+    const raw = localStorage.getItem(REMINDERS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return { enabled: false, times: ["09:00"] };
+}
+
+function saveReminders(cfg: DailyReminders) {
+  localStorage.setItem(REMINDERS_KEY, JSON.stringify(cfg));
+}
+
 function NotificationSidebarButton({ expanded }: { expanded: boolean }) {
   const [permission, setPermission] = useState<NotificationPermission>(
     getNotificationPermission()
   );
+  const [open, setOpen] = useState(false);
+  const [cfg, setCfg] = useState<DailyReminders>(loadReminders);
+  const [newTime, setNewTime] = useState("09:00");
 
   if (!isNotificationSupported()) return null;
 
-  const handleClick = async () => {
-    if (permission === "granted") {
-      sendNotification("🎁 КОРОБОЧКА", { body: "Уведомления работают!" });
-      toast.success("Уведомления включены");
-      return;
-    }
+  const ensurePermission = async () => {
+    if (permission === "granted") return true;
     if (permission === "denied") {
       toast.error("Уведомления заблокированы в настройках браузера");
-      return;
+      return false;
     }
     const granted = await requestNotificationPermission();
     setPermission(granted ? "granted" : "denied");
-    if (granted) {
-      toast.success("Уведомления включены!");
-      sendNotification("🎁 КОРОБОЧКА", { body: "Теперь вы будете получать напоминания" });
-    } else {
-      toast.error("Разрешение не получено");
-    }
+    return granted;
   };
 
-  const Icon = permission === "granted" ? BellRing : permission === "denied" ? BellOff : Bell;
-  const label = permission === "granted" ? "Уведомления вкл." : permission === "denied" ? "Уведомления выкл." : "Уведомления";
+  const toggleEnabled = async () => {
+    if (!cfg.enabled) {
+      const ok = await ensurePermission();
+      if (!ok) return;
+    }
+    const next = { ...cfg, enabled: !cfg.enabled };
+    setCfg(next); saveReminders(next);
+    if (next.enabled) toast.success("Напоминания включены");
+  };
+
+  const addTime = () => {
+    if (!/^\d{2}:\d{2}$/.test(newTime)) return;
+    if (cfg.times.includes(newTime)) return;
+    const next = { ...cfg, times: [...cfg.times, newTime].sort() };
+    setCfg(next); saveReminders(next);
+  };
+
+  const removeTime = (t: string) => {
+    const next = { ...cfg, times: cfg.times.filter((x) => x !== t) };
+    setCfg(next); saveReminders(next);
+  };
+
+  const Icon = cfg.enabled && permission === "granted" ? BellRing : permission === "denied" ? BellOff : Bell;
+  const label = "Напоминания";
+
+  if (!expanded) {
+    return (
+      <button
+        onClick={() => sendNotification("🎁 КОРОБОЧКА", { body: "Уведомления работают!" })}
+        title={label}
+        className={cn("flex items-center justify-center py-2.5 px-0 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-all")}
+      >
+        <Icon size={20} />
+      </button>
+    );
+  }
 
   return (
-    <button
-      onClick={handleClick}
-      title={!expanded ? label : undefined}
-      className={cn(
-        "flex items-center gap-3 rounded-lg transition-all text-sm font-medium text-muted-foreground hover:bg-muted/60 hover:text-foreground",
-        expanded ? "px-3 py-2.5" : "justify-center py-2.5 px-0"
+    <div className="px-2 py-1">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center gap-2 px-1 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
+      >
+        <Icon size={18} /> {label}
+      </button>
+      {open && (
+        <div className="mt-1 px-1">
+          <label className="flex items-center gap-2 text-xs mb-2 cursor-pointer">
+            <input type="checkbox" checked={cfg.enabled} onChange={toggleEnabled} />
+            <span>Список дел в указанное время</span>
+          </label>
+          <div className="flex flex-wrap gap-1 mb-2">
+            {cfg.times.map((t) => (
+              <span key={t} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-muted text-xs">
+                {t}
+                <button onClick={() => removeTime(t)} className="opacity-60 hover:opacity-100">×</button>
+              </span>
+            ))}
+          </div>
+          <div className="flex items-center gap-1">
+            <input
+              type="time"
+              value={newTime}
+              onChange={(e) => setNewTime(e.target.value)}
+              className="text-xs px-1.5 py-1 rounded border border-border bg-background flex-1"
+            />
+            <button onClick={addTime} className="text-xs px-2 py-1 rounded bg-primary text-primary-foreground">+</button>
+          </div>
+        </div>
       )}
-    >
-      <span className="shrink-0"><Icon size={20} /></span>
-      {expanded && <span className="truncate">{label}</span>}
-    </button>
+    </div>
   );
 }
 
