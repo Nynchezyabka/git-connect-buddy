@@ -24,10 +24,11 @@ function UpdateControl({ expanded }: { expanded: boolean }) {
   const [checking, setChecking] = useState(false);
 
   useEffect(() => {
-    return subscribeUpdates(({ needRefresh, checking }) => {
+    const unsub = subscribeUpdates(({ needRefresh, checking }) => {
       setNeedRefresh(needRefresh);
       setChecking(checking);
     });
+    return () => { unsub; };
   }, []);
 
   const supported = isUpdateSupported();
