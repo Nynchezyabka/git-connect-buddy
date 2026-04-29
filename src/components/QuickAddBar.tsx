@@ -113,8 +113,8 @@ export function QuickAddBar({ inTimer }: Props) {
   };
 
   const containerCls = inTimer
-    ? "fixed bottom-3 left-1/2 -translate-x-1/2 z-[10001] w-[min(560px,calc(100%-1.5rem))]"
-    : "fixed bottom-3 left-1/2 md:left-[calc(50%+1.5rem)] -translate-x-1/2 z-[90] w-[min(560px,calc(100%-1.5rem))]";
+    ? "fixed bottom-5 left-1/2 -translate-x-1/2 z-[10001] w-[min(560px,calc(100%-1rem))]"
+    : "fixed bottom-5 left-[calc(3rem+0.5rem)] right-2 md:left-1/2 md:right-auto md:-translate-x-1/2 md:w-[min(560px,calc(100%-4rem))] z-[90]";
 
   return (
     <>
