@@ -377,6 +377,9 @@ export function AppSidebar({ currentPage, onNavigate, onExport, onImport }: Prop
 
         <div className="border-t border-border my-2" />
 
+        {/* Update check */}
+        <UpdateControl expanded={expanded} />
+
         {/* Font size */}
         <FontSizeControl expanded={expanded} />
       </nav>
