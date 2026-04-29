@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import {
   Home, List, Archive, CalendarDays, Repeat, Download, Upload,
   ChevronLeft, ChevronRight, Info, Bell, BellOff, BellRing, Type,
+  RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -10,7 +11,77 @@ import {
   requestNotificationPermission,
   sendNotification,
 } from "@/lib/notifications";
+import {
+  isUpdateSupported,
+  checkForUpdates,
+  applyUpdate,
+  subscribeUpdates,
+} from "@/lib/pwaUpdate";
 import { toast } from "sonner";
+
+function UpdateControl({ expanded }: { expanded: boolean }) {
+  const [needRefresh, setNeedRefresh] = useState(false);
+  const [checking, setChecking] = useState(false);
+
+  useEffect(() => {
+    return subscribeUpdates(({ needRefresh, checking }) => {
+      setNeedRefresh(needRefresh);
+      setChecking(checking);
+    });
+  }, []);
+
+  const supported = isUpdateSupported();
+
+  const handleClick = async () => {
+    if (needRefresh) {
+      await applyUpdate();
+      return;
+    }
+    if (!supported) {
+      toast.info("Обновления доступны только в установленном приложении (korobo4ka.lovable.app)");
+      return;
+    }
+    const res = await checkForUpdates();
+    if (res === "available") toast.success("Доступна новая версия — нажмите ещё раз, чтобы обновить");
+    else if (res === "current") toast.success("У вас актуальная версия");
+    else toast.info("Проверка обновлений недоступна в этом режиме");
+  };
+
+  const label = needRefresh ? "Обновить сейчас" : "Проверить обновления";
+  const Icon = RefreshCw;
+
+  if (!expanded) {
+    return (
+      <button
+        onClick={handleClick}
+        title={label}
+        className={cn(
+          "flex items-center justify-center py-2.5 px-0 rounded-lg text-sm font-medium transition-all",
+          needRefresh
+            ? "text-primary hover:bg-primary/10"
+            : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+        )}
+      >
+        <Icon size={20} className={checking ? "animate-spin" : ""} />
+      </button>
+    );
+  }
+
+  return (
+    <button
+      onClick={handleClick}
+      className={cn(
+        "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
+        needRefresh
+          ? "bg-primary/10 text-primary"
+          : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+      )}
+    >
+      <Icon size={18} className={checking ? "animate-spin shrink-0" : "shrink-0"} />
+      <span className="truncate">{checking ? "Проверка…" : label}</span>
+    </button>
+  );
+}
 
 export type PageId = "home" | "tasks" | "archive" | "history" | "templates" | "info";
 
