@@ -172,42 +172,42 @@ export function QuickAddBar({ inTimer }: Props) {
         )}
 
         {/* Main bar */}
-        <div className="flex items-center gap-1.5 rounded-2xl bg-background border border-border shadow-lg p-1.5">
+        <div className="flex items-center gap-1 sm:gap-1.5 rounded-2xl bg-background border border-border shadow-lg p-2">
           <input
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
             placeholder="Новая задача…"
-            className="flex-1 px-3 py-2 rounded-xl bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
+            className="flex-1 min-w-0 px-2 sm:px-3 py-2 rounded-xl bg-transparent text-base sm:text-sm outline-none placeholder:text-muted-foreground/60"
           />
           <button
             onClick={() => { setShowTimePicker((v) => !v); setShowRecur(false); }}
-            className={cn("flex items-center gap-1 px-2 py-1.5 rounded-md text-xs border", time ? "bg-primary/10 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-muted")}
+            className={cn("flex items-center gap-1 px-2 h-10 sm:h-9 rounded-md text-xs border shrink-0", time ? "bg-primary/10 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-muted")}
             title="Время"
           >
-            <Clock size={14} /> {time || "время"}
+            <Clock size={16} /> <span className="hidden sm:inline">{time || "время"}</span>{time && <span className="sm:hidden">{time}</span>}
           </button>
           <button
             onClick={() => { setShowRecur((v) => !v); setShowTimePicker(false); }}
-            className={cn("p-1.5 rounded-md border", recur ? "bg-primary/10 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-muted")}
+            className={cn("flex items-center justify-center w-10 h-10 sm:w-9 sm:h-9 rounded-md border shrink-0", recur ? "bg-primary/10 border-primary/30 text-primary" : "border-border text-muted-foreground hover:bg-muted")}
             title="Повтор"
           >
-            <Repeat size={14} />
+            <Repeat size={16} />
           </button>
           <button
             onClick={handleVoice}
-            className={cn("p-1.5 rounded-md border", listening ? "bg-red-500/15 border-red-400 text-red-600 animate-pulse" : "border-border text-muted-foreground hover:bg-muted")}
+            className={cn("flex items-center justify-center w-10 h-10 sm:w-9 sm:h-9 rounded-md border shrink-0", listening ? "bg-red-500/15 border-red-400 text-red-600 animate-pulse" : "border-border text-muted-foreground hover:bg-muted")}
             title="Голосовой ввод"
           >
-            {listening ? <MicOff size={14} /> : <Mic size={14} />}
+            {listening ? <MicOff size={16} /> : <Mic size={16} />}
           </button>
           <button
             onClick={submit}
             disabled={!text.trim()}
-            className="flex items-center justify-center w-10 h-9 rounded-xl bg-primary text-primary-foreground disabled:opacity-40 active:scale-95 transition-all"
+            className="flex items-center justify-center w-11 h-11 sm:w-10 sm:h-9 rounded-xl bg-primary text-primary-foreground disabled:opacity-40 active:scale-95 transition-all shrink-0"
             title="Добавить"
           >
-            <Plus size={18} />
+            <Plus size={20} />
           </button>
         </div>
       </div>
