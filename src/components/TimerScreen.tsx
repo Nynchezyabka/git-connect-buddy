@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Task, CATEGORIES } from "@/types";
 import { useApp } from "@/App";
 import { getRandomBackgroundForCategory } from "@/lib/assets";
