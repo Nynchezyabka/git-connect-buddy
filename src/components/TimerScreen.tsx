@@ -106,9 +106,16 @@ export function TimerScreen({ task, onClose }: Props) {
     onClose();
   };
 
-  const returnTask = () => {
+  const candidatesInCategory = tasks.filter(
+    (t) => !t.completed && !t.scheduledFor && t.category === task.category && t.id !== task.id
+  );
+  const hasOtherInCategory = candidatesInCategory.length > 0;
+
+  const switchToRandomInCategory = () => {
+    if (!hasOtherInCategory) return;
+    const next = candidatesInCategory[Math.floor(Math.random() * candidatesInCategory.length)];
     saveTimeSpent();
-    onClose();
+    openTimer(next);
   };
 
   const selectPreset = (m: number) => {
