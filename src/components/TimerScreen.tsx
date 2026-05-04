@@ -13,7 +13,6 @@ const QUICK_MINUTES = [15, 30, 45];
 
 export function TimerScreen({ task, onClose }: Props) {
   const { tasks, setTasks, completeTaskWithRecurrence, openTimer } = useApp();
-  const [showSwitch, setShowSwitch] = useState(false);
   const [minutesInput, setMinutesInput] = useState("15");
   const [timeLeft, setTimeLeft] = useState(15 * 60);
   const [running, setRunning] = useState(false);
