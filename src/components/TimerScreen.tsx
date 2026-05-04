@@ -237,33 +237,42 @@ export function TimerScreen({ task, onClose }: Props) {
               </button>
             </div>
 
-            {/* Timer controls */}
-            <div className="flex gap-3 mb-6">
+            {/* Timer controls — main START is large & primary; others are secondary */}
+            <div className="flex flex-col items-center gap-3 mb-6">
               <button
                 onClick={start}
-                className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium active:scale-95 transition-all shadow-sm"
+                disabled={running}
+                className="flex items-center justify-center gap-2 px-10 py-4 rounded-xl bg-primary text-primary-foreground font-bold text-lg active:scale-95 transition-all shadow-lg disabled:opacity-50"
               >
-                <Play size={16} /> Старт
+                <Play size={22} /> Старт
               </button>
-              <button
-                onClick={pause}
-                className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-white/70 font-medium active:scale-95 transition-all shadow-sm border border-border/30"
-              >
-                <Pause size={16} /> Пауза
-              </button>
-              <button
-                onClick={reset}
-                className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-white/70 font-medium active:scale-95 transition-all shadow-sm border border-border/30"
-              >
-                <RotateCcw size={16} /> Сброс
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={pause}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/60 text-sm active:scale-95 transition-all border border-border/30"
+                >
+                  <Pause size={14} /> Пауза
+                </button>
+                <button
+                  onClick={reset}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/60 text-sm active:scale-95 transition-all border border-border/30"
+                >
+                  <RotateCcw size={14} /> Сброс
+                </button>
+                <button
+                  onClick={() => setShowSwitch(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/60 text-sm active:scale-95 transition-all border border-border/30"
+                >
+                  <Shuffle size={14} /> Сменить задачу
+                </button>
+              </div>
             </div>
 
             <button
               onClick={completeTask}
-              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-emerald-600/80 text-white font-medium active:scale-95 transition-all shadow-md"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-md bg-emerald-700/15 text-emerald-900 text-sm font-medium active:scale-95 transition-all border border-emerald-700/30"
             >
-              <Check size={18} /> Готово
+              <Check size={14} /> Отметить готово
             </button>
           </>
         )}
