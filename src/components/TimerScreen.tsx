@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Task, CATEGORIES } from "@/types";
 import { useApp } from "@/App";
 import { getRandomBackgroundForCategory } from "@/lib/assets";
-import { X, Play, Pause, RotateCcw, Check, Undo2, Volume2, VolumeX } from "lucide-react";
+import { X, Play, Pause, RotateCcw, Check, Undo2, Volume2, VolumeX, Shuffle } from "lucide-react";
 
 interface Props {
   task: Task;
@@ -12,7 +12,8 @@ interface Props {
 const QUICK_MINUTES = [15, 30, 45];
 
 export function TimerScreen({ task, onClose }: Props) {
-  const { setTasks, completeTaskWithRecurrence } = useApp();
+  const { tasks, setTasks, completeTaskWithRecurrence, openTimer } = useApp();
+  const [showSwitch, setShowSwitch] = useState(false);
   const [minutesInput, setMinutesInput] = useState("15");
   const [timeLeft, setTimeLeft] = useState(15 * 60);
   const [running, setRunning] = useState(false);
@@ -236,33 +237,42 @@ export function TimerScreen({ task, onClose }: Props) {
               </button>
             </div>
 
-            {/* Timer controls */}
-            <div className="flex gap-3 mb-6">
+            {/* Timer controls — main START is large & primary; others are secondary */}
+            <div className="flex flex-col items-center gap-3 mb-6">
               <button
                 onClick={start}
-                className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium active:scale-95 transition-all shadow-sm"
+                disabled={running}
+                className="flex items-center justify-center gap-2 px-10 py-4 rounded-xl bg-primary text-primary-foreground font-bold text-lg active:scale-95 transition-all shadow-lg disabled:opacity-50"
               >
-                <Play size={16} /> Старт
+                <Play size={22} /> Старт
               </button>
-              <button
-                onClick={pause}
-                className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-white/70 font-medium active:scale-95 transition-all shadow-sm border border-border/30"
-              >
-                <Pause size={16} /> Пауза
-              </button>
-              <button
-                onClick={reset}
-                className="flex items-center gap-1.5 px-5 py-2.5 rounded-lg bg-white/70 font-medium active:scale-95 transition-all shadow-sm border border-border/30"
-              >
-                <RotateCcw size={16} /> Сброс
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={pause}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/60 text-sm active:scale-95 transition-all border border-border/30"
+                >
+                  <Pause size={14} /> Пауза
+                </button>
+                <button
+                  onClick={reset}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/60 text-sm active:scale-95 transition-all border border-border/30"
+                >
+                  <RotateCcw size={14} /> Сброс
+                </button>
+                <button
+                  onClick={() => setShowSwitch(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/60 text-sm active:scale-95 transition-all border border-border/30"
+                >
+                  <Shuffle size={14} /> Сменить задачу
+                </button>
+              </div>
             </div>
 
             <button
               onClick={completeTask}
-              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-emerald-600/80 text-white font-medium active:scale-95 transition-all shadow-md"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-md bg-emerald-700/15 text-emerald-900 text-sm font-medium active:scale-95 transition-all border border-emerald-700/30"
             >
-              <Check size={18} /> Готово
+              <Check size={14} /> Отметить готово
             </button>
           </>
         )}
@@ -282,6 +292,50 @@ export function TimerScreen({ task, onClose }: Props) {
             >
               <Undo2 size={18} /> Вернуть в коробочку
             </button>
+          </div>
+        )}
+
+        {showSwitch && (
+          <div
+            className="absolute inset-0 z-20 flex items-center justify-center bg-black/40 p-4"
+            onClick={() => setShowSwitch(false)}
+          >
+            <div
+              className="bg-background rounded-xl shadow-xl max-w-md w-full max-h-[80vh] flex flex-col overflow-hidden border border-border"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                <h3 className="font-display text-2xl">Выбрать задачу</h3>
+                <button onClick={() => setShowSwitch(false)} className="p-1.5 rounded-md hover:bg-muted">
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="overflow-y-auto p-2">
+                {tasks
+                  .filter((t) => !t.completed && t.id !== task.id && !t.scheduledFor)
+                  .map((t) => {
+                    const ci = CATEGORIES[t.category];
+                    return (
+                      <button
+                        key={t.id}
+                        onClick={() => {
+                          saveTimeSpent();
+                          setShowSwitch(false);
+                          openTimer(t);
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-lg mb-1 hover:opacity-90 active:scale-[0.99] transition-all flex items-center gap-2"
+                        style={{ backgroundColor: ci.bgColor }}
+                      >
+                        <span className="text-sm text-foreground/90 flex-1">{t.text}</span>
+                        <span className="text-xs opacity-60">{ci.name}</span>
+                      </button>
+                    );
+                  })}
+                {tasks.filter((t) => !t.completed && t.id !== task.id && !t.scheduledFor).length === 0 && (
+                  <p className="text-center text-sm text-muted-foreground py-6">Других активных задач нет</p>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>
