@@ -13,7 +13,6 @@ const QUICK_MINUTES = [15, 30, 45];
 
 export function TimerScreen({ task, onClose }: Props) {
   const { tasks, setTasks, completeTaskWithRecurrence, openTimer } = useApp();
-  const [showSwitch, setShowSwitch] = useState(false);
   const [minutesInput, setMinutesInput] = useState("15");
   const [timeLeft, setTimeLeft] = useState(15 * 60);
   const [running, setRunning] = useState(false);
@@ -105,6 +104,18 @@ export function TimerScreen({ task, onClose }: Props) {
     saveTimeSpent();
     completeTaskWithRecurrence(task.id);
     onClose();
+  };
+
+  const candidatesInCategory = tasks.filter(
+    (t) => !t.completed && !t.scheduledFor && t.category === task.category && t.id !== task.id
+  );
+  const hasOtherInCategory = candidatesInCategory.length > 0;
+
+  const switchToRandomInCategory = () => {
+    if (!hasOtherInCategory) return;
+    const next = candidatesInCategory[Math.floor(Math.random() * candidatesInCategory.length)];
+    saveTimeSpent();
+    openTimer(next);
   };
 
   const returnTask = () => {
@@ -260,8 +271,10 @@ export function TimerScreen({ task, onClose }: Props) {
                   <RotateCcw size={14} /> Сброс
                 </button>
                 <button
-                  onClick={() => setShowSwitch(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/60 text-sm active:scale-95 transition-all border border-border/30"
+                  onClick={switchToRandomInCategory}
+                  disabled={!hasOtherInCategory}
+                  title={hasOtherInCategory ? "Случайная другая задача из этой же категории" : "В этой категории больше нет активных задач"}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/60 text-sm active:scale-95 transition-all border border-border/30 disabled:opacity-40"
                 >
                   <Shuffle size={14} /> Сменить задачу
                 </button>
@@ -295,49 +308,6 @@ export function TimerScreen({ task, onClose }: Props) {
           </div>
         )}
 
-        {showSwitch && (
-          <div
-            className="absolute inset-0 z-20 flex items-center justify-center bg-black/40 p-4"
-            onClick={() => setShowSwitch(false)}
-          >
-            <div
-              className="bg-background rounded-xl shadow-xl max-w-md w-full max-h-[80vh] flex flex-col overflow-hidden border border-border"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-                <h3 className="font-display text-2xl">Выбрать задачу</h3>
-                <button onClick={() => setShowSwitch(false)} className="p-1.5 rounded-md hover:bg-muted">
-                  <X size={18} />
-                </button>
-              </div>
-              <div className="overflow-y-auto p-2">
-                {tasks
-                  .filter((t) => !t.completed && t.id !== task.id && !t.scheduledFor)
-                  .map((t) => {
-                    const ci = CATEGORIES[t.category];
-                    return (
-                      <button
-                        key={t.id}
-                        onClick={() => {
-                          saveTimeSpent();
-                          setShowSwitch(false);
-                          openTimer(t);
-                        }}
-                        className="w-full text-left px-3 py-2 rounded-lg mb-1 hover:opacity-90 active:scale-[0.99] transition-all flex items-center gap-2"
-                        style={{ backgroundColor: ci.bgColor }}
-                      >
-                        <span className="text-sm text-foreground/90 flex-1">{t.text}</span>
-                        <span className="text-xs opacity-60">{ci.name}</span>
-                      </button>
-                    );
-                  })}
-                {tasks.filter((t) => !t.completed && t.id !== task.id && !t.scheduledFor).length === 0 && (
-                  <p className="text-center text-sm text-muted-foreground py-6">Других активных задач нет</p>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
