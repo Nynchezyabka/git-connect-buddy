@@ -260,8 +260,10 @@ export function TimerScreen({ task, onClose }: Props) {
                   <RotateCcw size={14} /> Сброс
                 </button>
                 <button
-                  onClick={() => setShowSwitch(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/60 text-sm active:scale-95 transition-all border border-border/30"
+                  onClick={switchToRandomInCategory}
+                  disabled={!hasOtherInCategory}
+                  title={hasOtherInCategory ? "Случайная другая задача из этой же категории" : "В этой категории больше нет активных задач"}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/60 text-sm active:scale-95 transition-all border border-border/30 disabled:opacity-40"
                 >
                   <Shuffle size={14} /> Сменить задачу
                 </button>
