@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Task, CATEGORIES } from "@/types";
 import { useApp } from "@/App";
 import { getRandomBackgroundForCategory } from "@/lib/assets";
-import { X, Play, Pause, RotateCcw, Check, Undo2, Volume2, VolumeX } from "lucide-react";
+import { X, Play, Pause, RotateCcw, Check, Undo2, Volume2, VolumeX, Shuffle } from "lucide-react";
 
 interface Props {
   task: Task;
@@ -12,7 +12,8 @@ interface Props {
 const QUICK_MINUTES = [15, 30, 45];
 
 export function TimerScreen({ task, onClose }: Props) {
-  const { setTasks, completeTaskWithRecurrence } = useApp();
+  const { tasks, setTasks, completeTaskWithRecurrence, openTimer } = useApp();
+  const [showSwitch, setShowSwitch] = useState(false);
   const [minutesInput, setMinutesInput] = useState("15");
   const [timeLeft, setTimeLeft] = useState(15 * 60);
   const [running, setRunning] = useState(false);
