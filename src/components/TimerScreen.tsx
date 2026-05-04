@@ -118,6 +118,11 @@ export function TimerScreen({ task, onClose }: Props) {
     openTimer(next);
   };
 
+  const returnTask = () => {
+    saveTimeSpent();
+    onClose();
+  };
+
   const selectPreset = (m: number) => {
     setMinutesInput(String(m));
     if (!running) setTimeLeft(m * 60);
